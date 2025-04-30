@@ -2,6 +2,8 @@
 
 This project implements an AI-powered chatbot that integrates with Signal messenger, allowing users to interact with various AI models (Gemini and Flux right now) through Signal messages.
 
+There is a successor project using a signal bot as an MCP (Model Context Protocol) Client here: [https://github.com/piebro/signal-mcp-client](https://github.com/piebro/signal-mcp-client).
+
 ## Features
 
 - Interaction with AI models (Gemini) via Signal messages
