@@ -7,8 +7,9 @@ import config
 
 
 class User:
-    def __init__(self, phone_number, default_system_instruction, default_model):
+    def __init__(self, phone_number, default_system_instruction, default_model, group_id=None):
         self.phone_number = phone_number
+        self.group_id = group_id  # None for individual chats, group ID for group chats
         self.current_system_instruction = default_system_instruction
         self.current_model = default_model
         self.trusted = phone_number in config.TRUSTED_PHONE_NUMBERS
@@ -60,9 +61,18 @@ class User:
 
     def send_message(self, content, attachment=None):
         url = f"{config.HTTP_BASE_URL}/v2/send"
+
+        # If this is a group chat, send to the group; otherwise send to individual
+        if self.group_id:
+            recipients = [self.group_id]
+            recipient_display = f"group {self.group_id[:20]}..."
+        else:
+            recipients = [self.phone_number]
+            recipient_display = self.phone_number
+
         payload = {
             "number": config.SIGNAL_PHONE_NUMBER,
-            "recipients": [self.phone_number],
+            "recipients": recipients,
         }
         if isinstance(content, str):
             payload["message"] = content
@@ -72,6 +82,10 @@ class User:
         try:
             response = requests.post(url, json=payload)
             response.raise_for_status()
-            print(f"Message sent successfully to {self.phone_number}")
+            print(f"Message sent successfully to {recipient_display}")
         except requests.RequestException as e:
             print(f"Error sending message: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Response status: {e.response.status_code}")
+                print(f"Response content: {e.response.text}")
+            print(f"Payload sent: {payload}")

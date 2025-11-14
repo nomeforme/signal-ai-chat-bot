@@ -36,10 +36,34 @@ def download_attachment(attachment_id: str):
         return None
 
 
-def get_or_create_user(sender):
-    if sender not in users:
-        users[sender] = User(sender, DEFAULT_SYSTEM_INSTRUCTION, DEFAULT_MODEL)
-    return users[sender]
+def get_group_id_from_internal(internal_id: str):
+    """Convert internal group ID to the proper Signal API group ID"""
+    url = f"{HTTP_BASE_URL}/v1/groups/{SIGNAL_PHONE_NUMBER}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        groups = response.json()
+
+        # Find the group with matching internal_id
+        for group in groups:
+            if group.get("internal_id") == internal_id:
+                return group.get("id")
+
+        # If not found, return the internal_id with group. prefix as fallback
+        return f"group.{internal_id}" if not internal_id.startswith("group.") else internal_id
+    except requests.RequestException as e:
+        print(f"Error fetching groups: {e}")
+        # Fallback
+        return f"group.{internal_id}" if not internal_id.startswith("group.") else internal_id
+
+
+def get_or_create_user(sender, group_id=None):
+    # Create unique key: use group_id if it's a group chat, otherwise use sender phone number
+    user_key = group_id if group_id else sender
+
+    if user_key not in users:
+        users[user_key] = User(sender, DEFAULT_SYSTEM_INSTRUCTION, DEFAULT_MODEL, group_id=group_id)
+    return users[user_key]
 
 
 def handle_change_prompt_cmd(user, system_instruction_number):
@@ -236,7 +260,16 @@ def process_message(message: Dict):
     timestamp = datetime.fromtimestamp(message["envelope"]["timestamp"] / 1000.0)
     attachments = message["envelope"]["dataMessage"].get("attachments", [])
 
-    print(f"Received message from {sender} at {timestamp}: {content}")
+    # Check if this is a group message
+    group_info = message["envelope"]["dataMessage"].get("groupInfo")
+    group_id = None
+    if group_info and "groupId" in group_info:
+        # Convert internal group ID to proper Signal API group ID
+        internal_group_id = group_info["groupId"]
+        group_id = get_group_id_from_internal(internal_group_id)
+        print(f"Received GROUP message from {sender} in {group_id[:30]}... at {timestamp}: {content}")
+    else:
+        print(f"Received message from {sender} at {timestamp}: {content}")
 
     # Handle empty messages (e.g., image-only messages)
     if not content and not attachments:
@@ -252,7 +285,7 @@ def process_message(message: Dict):
         command = ""
         args = ""
 
-    user = get_or_create_user(sender)
+    user = get_or_create_user(sender, group_id=group_id)
 
     if command == "!help":
         user.send_message(HELP_MESSAGE)
