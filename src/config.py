@@ -1,6 +1,10 @@
 import os
 import json
 import prompts
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 WS_BASE_URL = "ws://localhost:8080"
 HTTP_BASE_URL = "http://localhost:8080"
@@ -10,8 +14,17 @@ VALID_MODELS = [
     "(1) gemini-1.5-flash-8b",
     "(2) gemini-1.5-flash-002",
     "(3) gemini-1.5-pro-002",
+    "(4) claude-3-haiku-20240307",
+    "(5) claude-3-5-haiku-20241022",
+    "(6) claude-haiku-4-5-20251001",
+    "(7) claude-3-opus-20240229",
+    "(8) claude-3-7-sonnet-20250219",
+    "(9) claude-sonnet-4-20250514",
+    "(10) claude-sonnet-4-5-20250929",
+    "(11) claude-opus-4-20250514",
+    "(12) claude-opus-4-1-20250805",
 ]
-DEFAULT_MODEL = "(2) gemini-1.5-flash-002"
+DEFAULT_MODEL = "(6) claude-haiku-4-5-20251001"
 TRUSTED_PHONE_NUMBERS = os.environ.get("TRUSTED_PHONE_NUMBERS", "").split(",")
 LORA_PATH_TO_URL = json.loads(os.environ.get("LORA_PATH_TO_URL", "{}"))
 PROMPT_REPLACE_DICT = json.loads(os.environ.get("PROMPT_REPLACE_DICT", "{}"))

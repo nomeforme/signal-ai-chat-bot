@@ -1,14 +1,17 @@
 import io
+import os
 from datetime import datetime
 from typing import Dict
 from PIL import Image
 import requests
 import google.generativeai as genai
+import anthropic
 import fal_client
 from config import *
 from user import User
 
 genai.configure(api_key=os.environ["GOOGLE_AI_STUDIO_API"])
+anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 users = {}
 HELP_MESSAGE = f"""
@@ -50,9 +53,8 @@ def handle_change_prompt_cmd(user, system_instruction_number):
         user.set_system_instruction(SYSTEM_INSTRUCTIONS[system_prompt_name])
         user.send_message(f'System prompt changed to "{system_prompt_name}"')
     else:
-        user.send_message(
-            f"Available system prompts:\n{'\n'.join(SYSTEM_INSTRUCTIONS.keys())}"
-        )
+        prompts_list = '\n'.join(SYSTEM_INSTRUCTIONS.keys())
+        user.send_message(f"Available system prompts:\n{prompts_list}")
 
 
 def handle_change_model_cmd(user, ai_model_number):
@@ -60,7 +62,8 @@ def handle_change_model_cmd(user, ai_model_number):
         user.set_model(VALID_MODELS[int(ai_model_number) - 1])
         user.send_message(f'AI model changed to: "{user.current_model}"')
     else:
-        user.send_message(f"Available AI models:\n{'\n'.join(VALID_MODELS)}")
+        models_list = '\n'.join(VALID_MODELS)
+        user.send_message(f"Available AI models:\n{models_list}")
 
 
 def handle_custom_prompt_cmd(user, custom_prompt):
@@ -81,9 +84,8 @@ def handle_image_size_cmd(user, size_number):
             f'Image size changed to: "{image_size_name}" with {user.image_size})'
         )
     else:
-        user.send_message(
-            f"Invalid image size. Available sizes:\n{'\n'.join(IMAGE_SIZES.keys())}"
-        )
+        sizes_list = '\n'.join(IMAGE_SIZES.keys())
+        user.send_message(f"Invalid image size. Available sizes:\n{sizes_list}")
 
 
 def handle_generate_image_cmd(user, prompt):
@@ -144,19 +146,79 @@ def handle_generate_image_cmd(user, prompt):
 def handle_ai_message(user, content, attachments):
     message_components = [content] if content else []
 
+    model_name = user.current_model.split(" ")[1]
+    is_claude = model_name.startswith("claude-")
+
+    # Process attachments for image understanding
+    image_contents = []
     for attachment in attachments:
         attachment_id = attachment.get("id")
         if attachment_id:
             attachment_data = download_attachment(attachment_id)
             if attachment_data:
-                image = Image.open(io.BytesIO(attachment_data))
-                message_components.append(image)
+                if is_claude:
+                    # Claude expects base64-encoded images
+                    import base64
+                    image = Image.open(io.BytesIO(attachment_data))
+                    # Convert to bytes
+                    img_byte_arr = io.BytesIO()
+                    image.save(img_byte_arr, format=image.format or 'PNG')
+                    img_byte_arr = img_byte_arr.getvalue()
 
-    if message_components:
+                    image_contents.append({
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": f"image/{(image.format or 'png').lower()}",
+                            "data": base64.b64encode(img_byte_arr).decode('utf-8')
+                        }
+                    })
+                else:
+                    # Gemini uses PIL Image objects
+                    image = Image.open(io.BytesIO(attachment_data))
+                    message_components.append(image)
+
+    if message_components or image_contents:
         try:
-            chat = user.get_or_create_chat_session()
-            response = chat.send_message(message_components)
-            ai_response = response.text
+            if is_claude:
+                # Handle Claude API
+                chat = user.get_or_create_chat_session()
+
+                # Build the message content
+                claude_message_content = []
+                if image_contents:
+                    claude_message_content.extend(image_contents)
+                if content:
+                    claude_message_content.append({"type": "text", "text": content})
+
+                # Add user message to history
+                user.claude_history.append({
+                    "role": "user",
+                    "content": claude_message_content
+                })
+
+                # Make API call with conversation history
+                response = anthropic_client.messages.create(
+                    model=model_name,
+                    max_tokens=4096,
+                    system=user.current_system_instruction if user.current_system_instruction else "You are a helpful assistant.",
+                    messages=user.claude_history
+                )
+
+                ai_response = response.content[0].text
+
+                # Add assistant response to history
+                user.claude_history.append({
+                    "role": "assistant",
+                    "content": ai_response
+                })
+
+            else:
+                # Handle Gemini API (original code)
+                chat = user.get_or_create_chat_session()
+                response = chat.send_message(message_components)
+                ai_response = response.text
+
         except Exception as e:
             print(f"Error generating AI response: {e}")
             ai_response = "Sorry, I couldn't generate a response at this time."
@@ -170,15 +232,25 @@ def process_message(message: Dict):
         return
 
     sender = message["envelope"]["source"]
-    content = message["envelope"]["dataMessage"].get("message", "")
+    content = message["envelope"]["dataMessage"].get("message", "") or ""
     timestamp = datetime.fromtimestamp(message["envelope"]["timestamp"] / 1000.0)
     attachments = message["envelope"]["dataMessage"].get("attachments", [])
 
     print(f"Received message from {sender} at {timestamp}: {content}")
 
-    parts = content.split(maxsplit=1)
-    command = parts[0].lower()
-    args = parts[1].strip() if len(parts) > 1 else ""
+    # Handle empty messages (e.g., image-only messages)
+    if not content and not attachments:
+        return
+
+    # Parse command if there's text content
+    if content:
+        parts = content.split(maxsplit=1)
+        command = parts[0].lower()
+        args = parts[1].strip() if len(parts) > 1 else ""
+    else:
+        # No text, but has attachments - treat as AI message
+        command = ""
+        args = ""
 
     user = get_or_create_user(sender)
 

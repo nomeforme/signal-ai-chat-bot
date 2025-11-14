@@ -2,6 +2,7 @@ import requests
 import base64
 from datetime import datetime, timedelta
 import google.generativeai as genai
+import anthropic
 import config
 
 
@@ -13,6 +14,7 @@ class User:
         self.trusted = phone_number in config.TRUSTED_PHONE_NUMBERS
         self.last_activity = None
         self.chat_session = None
+        self.claude_history = []  # Store Claude conversation history
         self.image_size = config.DEFAULT_IMAGE_SIZE
 
     def is_session_inactive(self, timeout=config.SESSION_TIMEOUT):
@@ -22,18 +24,26 @@ class User:
 
     def reset_session(self):
         self.chat_session = None
+        self.claude_history = []
 
     def get_or_create_chat_session(self):
         if self.chat_session is None or self.is_session_inactive():
             model_name = self.current_model.split(" ")[1]
-            if self.current_system_instruction is None:
-                model = genai.GenerativeModel(model_name=model_name)
+            # Check if it's a Claude model
+            if model_name.startswith("claude-"):
+                # For Claude, we don't create a session object, just reset history
+                self.claude_history = []
+                self.chat_session = "claude"  # Marker to indicate Claude is active
             else:
-                model = genai.GenerativeModel(
-                    model_name=model_name,
-                    system_instruction=self.current_system_instruction,
-                )
-            self.chat_session = model.start_chat(history=[])
+                # Gemini models
+                if self.current_system_instruction is None:
+                    model = genai.GenerativeModel(model_name=model_name)
+                else:
+                    model = genai.GenerativeModel(
+                        model_name=model_name,
+                        system_instruction=self.current_system_instruction,
+                    )
+                self.chat_session = model.start_chat(history=[])
             self.last_activity = datetime.now()
         return self.chat_session
 
