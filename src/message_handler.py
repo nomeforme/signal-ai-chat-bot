@@ -40,30 +40,20 @@ def get_bot_uuid(bot_phone):
     if bot_phone in bot_uuid_cache:
         return bot_uuid_cache[bot_phone]
 
-    # Try to get UUID from accounts endpoint
+    # Try to get UUID from Signal API configuration endpoint
     try:
-        url = f"{HTTP_BASE_URL}/v1/accounts"
+        url = f"{HTTP_BASE_URL}/v1/configuration/{bot_phone}"
         response = requests.get(url)
         response.raise_for_status()
-        accounts = response.json()
+        config_data = response.json()
 
-        # The accounts endpoint only returns phone numbers, not UUIDs
-        # We need to check the local data directory for UUIDs
-        import json
-        from pathlib import Path
-
-        accounts_file = Path.home() / ".local/share/signal-api/data/accounts.json"
-        if accounts_file.exists():
-            with open(accounts_file, 'r') as f:
-                data = json.load(f)
-                for account in data.get("accounts", []):
-                    if account.get("number") == bot_phone:
-                        uuid = account.get("uuid")
-                        if uuid:
-                            bot_uuid_cache[bot_phone] = uuid
-                            return uuid
+        uuid = config_data.get("uuid")
+        if uuid:
+            bot_uuid_cache[bot_phone] = uuid
+            print(f"DEBUG - Cached UUID for {bot_phone}: {uuid}")
+            return uuid
     except Exception as e:
-        print(f"Warning: Could not fetch UUID for {bot_phone}: {e}")
+        print(f"Warning: Could not fetch UUID for {bot_phone} from API: {e}")
 
     return None
 
