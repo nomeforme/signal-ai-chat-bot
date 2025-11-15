@@ -108,6 +108,7 @@ VALID_MODELS = [
 DEFAULT_MODEL = CONFIG.get("default_model", "(6) claude-haiku-4-5-20251001")
 LORA_PATH_TO_URL = CONFIG.get("lora_path_to_url", {})
 PROMPT_REPLACE_DICT = CONFIG.get("prompt_replace_dict", {})
+RANDOM_REPLY_CHANCE = CONFIG.get("random_reply_chance", 0)  # Set to N for 1 in N chance (0 = disabled)
 IMAGE_SIZES = {
     "(1) square": {"width": 512, "height": 512},
     "(2) square_hd": {"width": 1024, "height": 1024},

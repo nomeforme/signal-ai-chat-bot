@@ -1,5 +1,6 @@
 import io
 import os
+import random
 from datetime import datetime
 from typing import Dict
 from PIL import Image
@@ -809,6 +810,12 @@ def process_message(message: Dict, bot_phone: str = None):
             # Only respond if bot is mentioned (this includes commands)
             should_respond = bot_mentioned
             print(f"DEBUG - [OPT-OUT MODE] Storing message in history")
+
+        # Random reply feature: Give bot a chance to respond even when not mentioned
+        if not should_respond and config.RANDOM_REPLY_CHANCE > 0:
+            if random.randint(1, config.RANDOM_REPLY_CHANCE) == 1:
+                should_respond = True
+                print(f"DEBUG - Random reply triggered for {bot_phone} (1/{config.RANDOM_REPLY_CHANCE} chance)")
     else:
         # DMs always respond
         should_respond = True
