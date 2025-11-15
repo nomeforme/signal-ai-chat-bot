@@ -40,18 +40,22 @@ def get_bot_uuid(bot_phone):
     if bot_phone in bot_uuid_cache:
         return bot_uuid_cache[bot_phone]
 
-    # Try to get UUID from Signal API configuration endpoint
+    # Try to get UUID from Signal API identities endpoint
+    # The first identity is always the bot itself
     try:
-        url = f"{HTTP_BASE_URL}/v1/configuration/{bot_phone}"
+        url = f"{HTTP_BASE_URL}/v1/identities/{bot_phone}"
         response = requests.get(url)
         response.raise_for_status()
-        config_data = response.json()
+        identities = response.json()
 
-        uuid = config_data.get("uuid")
-        if uuid:
-            bot_uuid_cache[bot_phone] = uuid
-            print(f"DEBUG - Cached UUID for {bot_phone}: {uuid}")
-            return uuid
+        # The first identity should be the bot itself
+        if identities and len(identities) > 0:
+            bot_identity = identities[0]
+            uuid = bot_identity.get("uuid")
+            if uuid:
+                bot_uuid_cache[bot_phone] = uuid
+                print(f"DEBUG - Cached UUID for {bot_phone}: {uuid}")
+                return uuid
     except Exception as e:
         print(f"Warning: Could not fetch UUID for {bot_phone} from API: {e}")
 
