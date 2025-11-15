@@ -577,7 +577,12 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
 
 def process_message(message: Dict, bot_phone: str = None):
-    if "envelope" not in message or "dataMessage" not in message["envelope"]:
+    if "envelope" not in message:
+        print(f"DEBUG - [{bot_phone}] Message missing envelope, skipping")
+        return
+    if "dataMessage" not in message["envelope"]:
+        # Could be a receipt, typing indicator, or other non-data message
+        print(f"DEBUG - [{bot_phone}] Message has no dataMessage (likely receipt/typing indicator), skipping")
         return
 
     # Use bot_phone if provided, otherwise fall back to config
