@@ -423,9 +423,20 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                     # Build list of other bots in the chat
                     other_bots = [bot["name"] for bot in config.BOT_INSTANCES if bot["phone"] != user.bot_phone]
-                    other_bots_text = ", ".join(other_bots) if other_bots else "other AIs"
 
-                    group_context = f"You are [{clean_model_name}]. You are in a group chat with users and other AIs. Messages are prefixed with [username/AI name] to indicate the participant. To directly address another participant (which will notify them), mention their name in your response. Other bots in this chat: {other_bots_text}."
+                    # Build list of known users from the name cache
+                    known_users = [name for name in user_name_to_phone.keys() if name not in [bot["name"] for bot in config.BOT_INSTANCES]]
+
+                    # Create participant list
+                    participants = []
+                    if other_bots:
+                        participants.append(f"Other bots: {', '.join(other_bots)}")
+                    if known_users:
+                        participants.append(f"Users: {', '.join(known_users)}")
+
+                    participants_text = ". ".join(participants) if participants else "other participants"
+
+                    group_context = f"You are [{clean_model_name}]. You are in a group chat with users and other AI bots. Messages are prefixed with [participant] to indicate the participant. To directly address another participant (which will notify them), mention their name in your response. {participants_text}."
 
                     if user.current_system_instruction:
                         system_prompt = f"{user.current_system_instruction}\n\n{group_context}"
