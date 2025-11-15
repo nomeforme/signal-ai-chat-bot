@@ -303,6 +303,7 @@ def process_message(message: Dict):
     content = message["envelope"]["dataMessage"].get("message", "") or ""
     timestamp = datetime.fromtimestamp(message["envelope"]["timestamp"] / 1000.0)
     attachments = message["envelope"]["dataMessage"].get("attachments", [])
+    mentions = message["envelope"]["dataMessage"].get("mentions", [])
 
     # Check if this is a group message
     group_info = message["envelope"]["dataMessage"].get("groupInfo")
@@ -313,6 +314,22 @@ def process_message(message: Dict):
         group_id = get_group_id_from_internal(internal_group_id)
         display_sender = sender_name if sender_name else sender
         print(f"Received GROUP message from {display_sender} ({sender_uuid[:8]}...) in {group_id[:30]}... at {timestamp}: {content}")
+        print(f"DEBUG - Mentions: {mentions}")
+
+        # In group chats, only respond if the bot is mentioned
+        bot_mentioned = False
+        if mentions:
+            # Check if any mention is for the bot (by UUID or phone number)
+            for mention in mentions:
+                # Mentions can have 'uuid' or 'number' field
+                if mention.get("uuid") or mention.get("number") == SIGNAL_PHONE_NUMBER:
+                    bot_mentioned = True
+                    print(f"DEBUG - Bot was mentioned!")
+                    break
+
+        if not bot_mentioned:
+            print(f"DEBUG - Bot not mentioned, ignoring group message")
+            return
     else:
         display_sender = sender_name if sender_name else sender
         print(f"Received message from {display_sender} ({sender}) at {timestamp}: {content}")
