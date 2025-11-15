@@ -48,13 +48,22 @@ def create_message_handler(bot_phone):
                     message_id = f"{source}:{timestamp}"
                     is_first_receiver = False
 
-                    # Extract mentioned bot UUIDs from the message
+                    # Extract mentioned bot UUIDs from the message (both @mentions and replies/quotes)
                     mentioned_bot_uuids = set()
+
+                    # Check for @mentions
                     mentions = data_message.get("mentions", [])
                     for mention in mentions:
                         mention_uuid = mention.get("uuid")
                         if mention_uuid:
                             mentioned_bot_uuids.add(mention_uuid)
+
+                    # Check for quote/reply
+                    quote = data_message.get("quote")
+                    if quote:
+                        quote_author_uuid = quote.get("authorUuid")
+                        if quote_author_uuid:
+                            mentioned_bot_uuids.add(quote_author_uuid)
 
                     with message_check_lock:
                         if message_id not in last_user_message:
@@ -106,9 +115,8 @@ def create_close_handler(bot_phone, bot_name):
             if bot_phone in websocket_state:
                 websocket_state[bot_phone]["connected"] = False
 
-        # Attempt reconnection
-        print(f"[{bot_phone}] Attempting to reconnect in 5 seconds...")
-        time.sleep(5)
+        # Attempt immediate reconnection
+        print(f"[{bot_phone}] Attempting to reconnect...")
         reconnect_websocket(bot_phone, bot_name)
     return on_close
 
