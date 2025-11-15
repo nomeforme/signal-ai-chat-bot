@@ -9,6 +9,7 @@ load_dotenv()
 WS_BASE_URL = "ws://localhost:8080"
 HTTP_BASE_URL = "http://localhost:8080"
 SIGNAL_PHONE_NUMBER = os.environ.get("SIGNAL_PHONE_NUMBER")
+BOT_NAME = os.environ.get("BOT_NAME", "AI Bot")  # Default bot name for group chats
 SESSION_TIMEOUT = 30  # minutes
 VALID_MODELS = [
     "(1) gemini-1.5-flash-8b",

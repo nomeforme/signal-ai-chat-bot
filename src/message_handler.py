@@ -167,7 +167,15 @@ def handle_generate_image_cmd(user, prompt):
         user.send_message("Failed to generate the image.")
 
 
-def handle_ai_message(user, content, attachments):
+def handle_ai_message(user, content, attachments, sender_name=None):
+    # Prepend sender name to content for group chats
+    if user.group_id and sender_name:
+        # For group chats, prefix the message with the sender's name
+        if content:
+            content = f"[{sender_name}]: {content}"
+        else:
+            content = f"[{sender_name}] sent an image"
+
     message_components = [content] if content else []
 
     model_name = user.current_model.split(" ")[1]
@@ -221,20 +229,52 @@ def handle_ai_message(user, content, attachments):
                     "content": claude_message_content
                 })
 
+                # Build system prompt - add group chat context if needed
+                if user.group_id:
+                    if user.current_system_instruction:
+                        system_prompt = f"{user.current_system_instruction}\n\nNote: You are in a group chat. User messages are prefixed with [username] to indicate who is speaking. Do not include any prefix in your own responses."
+                    else:
+                        system_prompt = "You are in a group chat. User messages are prefixed with [username] to indicate who is speaking. Do not include any prefix in your own responses."
+                else:
+                    system_prompt = user.current_system_instruction if user.current_system_instruction else None
+
+                # Debug: Print what we're sending to Claude
+                print(f"DEBUG - System prompt: {system_prompt}")
+                print(f"DEBUG - Messages being sent: {user.claude_history}")
+
                 # Make API call with conversation history
-                response = anthropic_client.messages.create(
-                    model=model_name,
-                    max_tokens=4096,
-                    system=user.current_system_instruction if user.current_system_instruction else "You are a helpful assistant.",
-                    messages=user.claude_history
-                )
+                api_params = {
+                    "model": model_name,
+                    "max_tokens": 4096,
+                    "messages": user.claude_history
+                }
+                if system_prompt:
+                    api_params["system"] = system_prompt
+
+                response = anthropic_client.messages.create(**api_params)
+
+                print(f"DEBUG - Claude's raw response: {response.content[0].text}")
 
                 ai_response = response.content[0].text
 
-                # Add assistant response to history
+                # Strip any [prefix]: that Claude might have added despite instructions
+                import re
+                ai_response = re.sub(r'^\[.*?\]:\s*', '', ai_response).strip()
+
+                print(f"DEBUG - After stripping prefix: {ai_response}")
+
+                # For group chats, add model name prefix to history (helps track which model said what)
+                if user.group_id:
+                    # Extract clean model name without date suffix
+                    clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
+                    history_response = f"[{clean_model_name}]: {ai_response}"
+                else:
+                    history_response = ai_response
+
+                # Add assistant response to history (with model prefix for group chats)
                 user.claude_history.append({
                     "role": "assistant",
-                    "content": ai_response
+                    "content": history_response
                 })
 
             else:
@@ -246,6 +286,8 @@ def handle_ai_message(user, content, attachments):
         except Exception as e:
             print(f"Error generating AI response: {e}")
             ai_response = "Sorry, I couldn't generate a response at this time."
+
+        # Send the clean response (without prefix) to the user
         user.send_message(ai_response)
     else:
         user.send_message("I received your message, but it seems to be empty.")
@@ -256,6 +298,8 @@ def process_message(message: Dict):
         return
 
     sender = message["envelope"]["source"]
+    sender_uuid = message["envelope"].get("sourceUuid", "")
+    sender_name = message["envelope"].get("sourceName", "")  # This might have the profile name
     content = message["envelope"]["dataMessage"].get("message", "") or ""
     timestamp = datetime.fromtimestamp(message["envelope"]["timestamp"] / 1000.0)
     attachments = message["envelope"]["dataMessage"].get("attachments", [])
@@ -267,9 +311,11 @@ def process_message(message: Dict):
         # Convert internal group ID to proper Signal API group ID
         internal_group_id = group_info["groupId"]
         group_id = get_group_id_from_internal(internal_group_id)
-        print(f"Received GROUP message from {sender} in {group_id[:30]}... at {timestamp}: {content}")
+        display_sender = sender_name if sender_name else sender
+        print(f"Received GROUP message from {display_sender} ({sender_uuid[:8]}...) in {group_id[:30]}... at {timestamp}: {content}")
     else:
-        print(f"Received message from {sender} at {timestamp}: {content}")
+        display_sender = sender_name if sender_name else sender
+        print(f"Received message from {display_sender} ({sender}) at {timestamp}: {content}")
 
     # Handle empty messages (e.g., image-only messages)
     if not content and not attachments:
@@ -300,4 +346,4 @@ def process_message(message: Dict):
     elif command == "!is":
         handle_image_size_cmd(user, args)
     else:
-        handle_ai_message(user, content, attachments)
+        handle_ai_message(user, content, attachments, sender_name=sender_name)
