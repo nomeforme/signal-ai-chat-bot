@@ -9,6 +9,9 @@ from message_handler import process_message
 # Global state for tracking WebSocket health
 websocket_state = {}  # {bot_phone: {"ws": ws, "thread": thread, "last_message": timestamp, "connected": bool}}
 reconnect_lock = threading.Lock()
+last_user_message = {}  # Track the last user message: {"message_id": timestamp, "received_by": set(), "data": {}, "mentioned_bots": set()}
+message_check_lock = threading.Lock()
+pending_messages = {}  # Messages to re-process after reconnection: {bot_phone: [message_data]}
 
 
 def create_message_handler(bot_phone):
@@ -28,6 +31,49 @@ def create_message_handler(bot_phone):
             data_message = envelope.get("dataMessage", {})
             message_text = data_message.get("message", "")[:50]  # First 50 chars
             print(f"DEBUG - [{bot_phone}] WebSocket received message from {source} at {timestamp}: {message_text}...")
+
+            # Track user messages for consistency checking
+            if data_message and timestamp != "unknown":
+                # Check if this is a user message (not from a bot)
+                is_bot_message = False
+                with reconnect_lock:
+                    for state in websocket_state.values():
+                        # Check if source matches any bot UUID
+                        if source in [state.get("bot_name", ""), bot_phone]:
+                            is_bot_message = True
+                            break
+
+                if not is_bot_message:
+                    # This is a user message, track it
+                    message_id = f"{source}:{timestamp}"
+                    is_first_receiver = False
+
+                    # Extract mentioned bot UUIDs from the message
+                    mentioned_bot_uuids = set()
+                    mentions = data_message.get("mentions", [])
+                    for mention in mentions:
+                        mention_uuid = mention.get("uuid")
+                        if mention_uuid:
+                            mentioned_bot_uuids.add(mention_uuid)
+
+                    with message_check_lock:
+                        if message_id not in last_user_message:
+                            last_user_message[message_id] = {
+                                "timestamp": time.time(),
+                                "received_by": set(),
+                                "check_scheduled": False,
+                                "data": data,  # Store the raw message data
+                                "mentioned_bot_uuids": mentioned_bot_uuids
+                            }
+                            is_first_receiver = True
+                        last_user_message[message_id]["received_by"].add(bot_phone)
+
+                        # If this is the first bot to receive this message, schedule a check
+                        if is_first_receiver and not last_user_message[message_id]["check_scheduled"]:
+                            last_user_message[message_id]["check_scheduled"] = True
+                            # Schedule consistency check in a separate thread after 3 seconds
+                            threading.Timer(3.0, check_message_consistency, args=[message_id]).start()
+
             print(f"DEBUG - [{bot_phone}] About to call process_message()")
 
             process_message(data, bot_phone)
@@ -75,6 +121,20 @@ def create_open_handler(bot_phone):
             if bot_phone in websocket_state:
                 websocket_state[bot_phone]["connected"] = True
                 websocket_state[bot_phone]["last_message"] = time.time()
+
+        # Process any pending messages for this bot
+        if bot_phone in pending_messages and pending_messages[bot_phone]:
+            messages_to_process = pending_messages[bot_phone][:]
+            pending_messages[bot_phone] = []  # Clear the queue
+
+            print(f"[{bot_phone}] Re-processing {len(messages_to_process)} pending message(s)...")
+            for msg_data in messages_to_process:
+                try:
+                    # Re-trigger message processing
+                    process_message(msg_data, bot_phone)
+                    print(f"[{bot_phone}] ✓ Successfully re-processed pending message")
+                except Exception as e:
+                    print(f"[{bot_phone}] ⚠ Error re-processing message: {e}")
     return on_open
 
 
@@ -121,6 +181,89 @@ def run_websocket(bot_phone, bot_name):
             time.sleep(5)
 
 
+def check_message_consistency(message_id):
+    """Check if all bots received a user message, reconnect mentioned bots that didn't"""
+    with message_check_lock:
+        if message_id not in last_user_message:
+            return
+
+        msg_data = last_user_message[message_id]
+        received_by = msg_data["received_by"]
+        mentioned_bot_uuids = msg_data.get("mentioned_bot_uuids", set())
+        message_data = msg_data.get("data", {})
+
+    # Get all bot phones, names, and UUIDs
+    all_bots = {}
+    bot_uuid_to_phone = {}
+    with reconnect_lock:
+        for phone, state in websocket_state.items():
+            all_bots[phone] = state.get("bot_name", "unknown")
+            # Get UUID from message_handler's cache
+            from message_handler import get_bot_uuid
+            bot_uuid = get_bot_uuid(phone)
+            if bot_uuid:
+                bot_uuid_to_phone[bot_uuid] = phone
+
+    missing_bots = set(all_bots.keys()) - received_by
+
+    # Determine which missing bots were mentioned
+    mentioned_missing_bots = set()
+    for bot_uuid in mentioned_bot_uuids:
+        bot_phone = bot_uuid_to_phone.get(bot_uuid)
+        if bot_phone and bot_phone in missing_bots:
+            mentioned_missing_bots.add(bot_phone)
+
+    if missing_bots:
+        print(f"\n{'='*60}")
+        print(f"MESSAGE CONSISTENCY CHECK")
+        print(f"{'='*60}")
+        print(f"Message ID: {message_id}")
+        print(f"Received by: {len(received_by)}/{len(all_bots)} bots")
+
+        if mentioned_missing_bots:
+            print(f"\n⚠ MENTIONED bots that MISSED the message:")
+            for phone in sorted(mentioned_missing_bots):
+                bot_name = all_bots.get(phone, "unknown")
+                print(f"  ✗ [{phone}] ({bot_name}) - WILL RECONNECT AND RE-TRIGGER")
+
+        other_missing = missing_bots - mentioned_missing_bots
+        if other_missing:
+            print(f"\nOther bots that missed (not mentioned, ignoring):")
+            for phone in sorted(other_missing):
+                bot_name = all_bots.get(phone, "unknown")
+                print(f"  • [{phone}] ({bot_name})")
+
+        # Only reconnect and re-trigger for mentioned bots that missed the message
+        if mentioned_missing_bots:
+            print(f"\nReconnecting {len(mentioned_missing_bots)} mentioned bot(s)...")
+
+            for bot_phone in mentioned_missing_bots:
+                # Queue the message for re-processing after reconnection
+                if bot_phone not in pending_messages:
+                    pending_messages[bot_phone] = []
+                pending_messages[bot_phone].append(message_data)
+
+                with reconnect_lock:
+                    if bot_phone in websocket_state:
+                        bot_name = websocket_state[bot_phone].get("bot_name", "unknown")
+                        print(f"  → Reconnecting [{bot_phone}] ({bot_name}) and will re-trigger response")
+
+                        ws = websocket_state[bot_phone].get("ws")
+                        if ws:
+                            try:
+                                websocket_state[bot_phone]["connected"] = False
+                                ws.close()
+                            except Exception as e:
+                                print(f"    ⚠ Error closing connection: {e}")
+        else:
+            print(f"\nℹ No mentioned bots missed the message, no reconnection needed")
+
+        print(f"{'='*60}\n")
+    else:
+        # All bots received the message
+        print(f"✓ Message consistency OK: {message_id[:40]}... ({len(received_by)}/{len(all_bots)} bots)")
+
+
 def reconnect_websocket(bot_phone, bot_name):
     """Reconnect a WebSocket that has disconnected"""
     with reconnect_lock:
@@ -147,37 +290,27 @@ def reconnect_websocket(bot_phone, bot_name):
 
 
 def check_websocket_health():
-    """Monitor WebSocket connections and reconnect if necessary"""
-    HEALTH_CHECK_INTERVAL = 60  # Check every 60 seconds
-    MESSAGE_TIMEOUT = 300  # If no messages for 5 minutes, consider connection stale
+    """Monitor WebSocket threads and clean up old message tracking"""
+    HEALTH_CHECK_INTERVAL = 30  # Check every 30 seconds
+    MESSAGE_HISTORY_CLEANUP = 60  # Clean up message tracking older than 60 seconds
+
+    print(f"Health monitor started - checking for dead threads and cleaning up old message tracking")
 
     while True:
         time.sleep(HEALTH_CHECK_INTERVAL)
 
         current_time = time.time()
 
+        # Check for dead threads
         with reconnect_lock:
-            for bot_phone, state in websocket_state.items():
+            for bot_phone, state in list(websocket_state.items()):
                 bot_name = state.get("bot_name", "unknown")
                 connected = state.get("connected", False)
-                last_message = state.get("last_message", 0)
-                time_since_message = current_time - last_message
-
-                # Check if connected
-                if not connected:
-                    print(f"WARNING - [{bot_phone}] ({bot_name}) WebSocket marked as disconnected")
-                    continue
-
-                # Check if we've received any messages recently (heartbeat)
-                # Note: This might not work well if the group is quiet
-                # The ping_interval in run_forever should keep connection alive
-                if time_since_message > MESSAGE_TIMEOUT:
-                    print(f"INFO - [{bot_phone}] ({bot_name}) No messages for {int(time_since_message)}s (connection may be idle)")
 
                 # Check if thread is alive
                 thread = state.get("thread")
                 if thread and not thread.is_alive():
-                    print(f"WARNING - [{bot_phone}] ({bot_name}) WebSocket thread died! Attempting reconnection...")
+                    print(f"\nWARNING - [{bot_phone}] ({bot_name}) WebSocket thread died! Restarting...")
                     state["connected"] = False
                     # Start a new thread
                     new_thread = threading.Thread(
@@ -188,6 +321,16 @@ def check_websocket_health():
                     )
                     new_thread.start()
                     state["thread"] = new_thread
+                    print(f"  New thread started for {bot_name}\n")
+
+        # Clean up old message tracking
+        with message_check_lock:
+            old_messages = [
+                msg_id for msg_id, data in last_user_message.items()
+                if current_time - data["timestamp"] > MESSAGE_HISTORY_CLEANUP
+            ]
+            for msg_id in old_messages:
+                del last_user_message[msg_id]
 
 
 if __name__ == "__main__":
@@ -219,8 +362,10 @@ if __name__ == "__main__":
         # Brief delay between starting connections to avoid overwhelming the server
         time.sleep(0.5)
 
-    print(f"All {len(BOT_INSTANCES)} bot(s) started. Press Ctrl+C to stop.")
-    print("WebSocket health monitoring active (checks every 60s)")
+    print(f"\nAll {len(BOT_INSTANCES)} bot(s) started. Press Ctrl+C to stop.")
+    print("Smart message consistency checking: ACTIVE")
+    print("  → Mentioned bots that miss messages will auto-reconnect and respond")
+    print("  → Non-mentioned bots that miss messages will be ignored")
     print("")
 
     # Start health monitoring thread
