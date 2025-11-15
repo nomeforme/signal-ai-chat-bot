@@ -11,6 +11,7 @@ HTTP_BASE_URL = "http://localhost:8080"
 SIGNAL_PHONE_NUMBER = os.environ.get("SIGNAL_PHONE_NUMBER")
 BOT_NAME = os.environ.get("BOT_NAME", "AI Bot")  # Default bot name for group chats
 SESSION_TIMEOUT = 30  # minutes
+MAX_HISTORY_MESSAGES = int(os.environ.get("MAX_HISTORY_MESSAGES", "200"))  # Rolling window size for conversation history
 VALID_MODELS = [
     "(1) gemini-1.5-flash-8b",
     "(2) gemini-1.5-flash-002",

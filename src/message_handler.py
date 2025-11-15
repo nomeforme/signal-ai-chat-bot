@@ -229,6 +229,12 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     "content": claude_message_content
                 })
 
+                # Trim history to keep only last N messages (rolling window)
+                if len(user.claude_history) > config.MAX_HISTORY_MESSAGES:
+                    # Keep the last MAX_HISTORY_MESSAGES messages
+                    user.claude_history = user.claude_history[-config.MAX_HISTORY_MESSAGES:]
+                    print(f"DEBUG - Trimmed history to last {config.MAX_HISTORY_MESSAGES} messages")
+
                 # If we shouldn't respond (not mentioned in group), just add to history and return
                 if not should_respond:
                     print(f"DEBUG - Message added to history but not responding (not mentioned)")
