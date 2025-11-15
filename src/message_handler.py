@@ -332,18 +332,20 @@ def process_message(message: Dict):
                     print(f"DEBUG - Bot was mentioned!")
                     break
 
-        # Store the flag for later - we'll still process the message for history
+        # Check if message should be stored in history
+        # Privacy-first: Only store if prefixed with "." OR bot is mentioned
+        store_in_history = content.startswith(".") or bot_mentioned
         should_respond = bot_mentioned
 
-        # Check if message should be hidden from history (starts with ".")
+        if not store_in_history:
+            # Not prefixed with "." and bot not mentioned - ignore completely
+            print(f"DEBUG - Message not prefixed with '.' and bot not mentioned, ignoring")
+            return
+
+        # If message starts with ".", remove the prefix for processing
         if content.startswith("."):
-            if bot_mentioned:
-                # Bot is mentioned, so respond normally (override hiding)
-                print(f"DEBUG - Hidden message but bot mentioned, processing normally")
-            else:
-                # Hidden message and bot not mentioned - ignore completely
-                print(f"DEBUG - Hidden message (starts with '.') and not mentioned, ignoring")
-                return
+            content = content[1:].lstrip()  # Remove "." and any following spaces
+            print(f"DEBUG - Opt-in message (started with '.'), storing in history")
     else:
         display_sender = sender_name if sender_name else sender
         print(f"Received message from {display_sender} ({sender}) at {timestamp}: {content}")
