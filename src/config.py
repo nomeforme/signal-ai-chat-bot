@@ -7,8 +7,9 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-WS_BASE_URL = "ws://localhost:8080"
-HTTP_BASE_URL = "http://localhost:8080"
+# Use environment variables with localhost as fallback
+WS_BASE_URL = os.environ.get("WS_BASE_URL", "ws://localhost:8080")
+HTTP_BASE_URL = os.environ.get("HTTP_BASE_URL", "http://localhost:8080")
 
 # Load configuration from config.json
 config_path = Path(__file__).parent.parent / "config.json"

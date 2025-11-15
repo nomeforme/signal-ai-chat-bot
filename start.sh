@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Signal AI Chat Bot Startup Script
-# This script starts the signal-cli-rest-api and the Python bot
+# This script starts both services using Docker Compose
 
 set -e  # Exit on error
 
-echo "🚀 Starting Signal AI Chat Bot..."
+echo "🚀 Starting Signal AI Chat Bot with Docker Compose..."
 echo ""
 
 # Check if config.json file exists
@@ -26,77 +26,67 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-# Check if uv is installed
-if ! command -v uv &> /dev/null; then
-    echo "❌ Error: uv is not installed"
-    echo "Please install uv first:"
-    echo "  curl -LsSf https://astral.sh/uv/install.sh | sh"
+# Detect Docker or Podman
+if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+    COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+elif command -v podman &> /dev/null && command -v podman-compose &> /dev/null; then
+    COMPOSE_CMD="podman-compose"
+else
+    echo "❌ Error: Neither 'docker compose' nor 'podman-compose' found"
+    echo "Please install Docker Compose or Podman Compose:"
+    echo "  Docker: https://docs.docker.com/compose/install/"
+    echo "  Podman: pip install podman-compose"
     exit 1
 fi
 
-# Check if virtual environment exists
-if [ ! -d ".venv" ]; then
-    echo "⚠️  Virtual environment not found. Creating one with uv..."
-    uv venv
-fi
-
-echo "📦 Syncing dependencies with uv..."
-uv sync
-
-echo "✅ Environment ready"
+echo "📦 Using: $COMPOSE_CMD"
+echo ""
+echo "🔧 Building and starting services..."
+echo "   - signal-api: Signal CLI REST API"
+echo "   - bot: Python bot with auto-reload"
 echo ""
 
-# Check if signal-cli-rest-api is already running
-if curl -s http://localhost:8080/v1/about > /dev/null 2>&1; then
-    echo "✅ signal-cli-rest-api is already running on port 8080"
+# Build and start services
+$COMPOSE_CMD up --build -d
+
+echo ""
+echo "⏳ Waiting for services to be ready..."
+sleep 5
+
+# Check if services are running
+if $COMPOSE_CMD ps | grep -q "signal-api.*running"; then
+    echo "✅ signal-api is running"
 else
-    echo "🔧 Starting signal-cli-rest-api..."
+    echo "❌ signal-api failed to start"
+    echo "Check logs with: $COMPOSE_CMD logs signal-api"
+    exit 1
+fi
 
-    # Detect Docker or Podman
-    if command -v podman &> /dev/null; then
-        CONTAINER_CMD="podman"
-    elif command -v docker &> /dev/null; then
-        CONTAINER_CMD="docker"
-    else
-        echo "❌ Error: Neither Docker nor Podman found"
-        exit 1
-    fi
-
-    echo "   Using $CONTAINER_CMD to start the container..."
-
-    # Check if container exists but is stopped
-    if $CONTAINER_CMD ps -a --format '{{.Names}}' | grep -q '^signal-api$'; then
-        echo "   Container exists, starting it..."
-        $CONTAINER_CMD start signal-api
-    else
-        # Start signal-cli-rest-api in the background
-        $CONTAINER_CMD run -d --name signal-api \
-            -p 8080:8080 \
-            -v $HOME/.local/share/signal-api:/home/.local/share/signal-cli \
-            -e 'MODE=json-rpc' \
-            bbernhard/signal-cli-rest-api
-    fi
-
-    echo "⏳ Waiting for signal-cli-rest-api to be ready..."
-    sleep 5
-
-    # Check if it started successfully
-    if curl -s http://localhost:8080/v1/about > /dev/null 2>&1; then
-        echo "✅ signal-cli-rest-api started successfully"
-    else
-        echo "❌ Failed to start signal-cli-rest-api"
-        echo "   Check if podman is installed and running"
-        exit 1
-    fi
+if $COMPOSE_CMD ps | grep -q "signal-bot.*running"; then
+    echo "✅ signal-bot is running with auto-reload"
+else
+    echo "❌ signal-bot failed to start"
+    echo "Check logs with: $COMPOSE_CMD logs bot"
+    exit 1
 fi
 
 echo ""
-echo "🤖 Starting Signal AI Bot..."
-echo "   Configuration loaded from config.json"
-echo "   Press Ctrl+C to stop the bot"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ All services started successfully!"
 echo ""
+echo "📝 Useful commands:"
+echo "  View logs:        $COMPOSE_CMD logs -f"
+echo "  View bot logs:    $COMPOSE_CMD logs -f bot"
+echo "  Restart services: $COMPOSE_CMD restart"
+echo "  Stop services:    $COMPOSE_CMD down"
+echo ""
+echo "🔄 Auto-reload is ENABLED - code changes will restart the bot automatically"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Start the Python bot using uv run
-uv run python src/main.py
+# Follow logs (can be stopped with Ctrl+C)
+echo "Following bot logs (Ctrl+C to stop)..."
+echo ""
+$COMPOSE_CMD logs -f bot

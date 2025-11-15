@@ -1,0 +1,55 @@
+services:
+  # Signal CLI REST API
+  signal-api:
+    image: bbernhard/signal-cli-rest-api:latest
+    container_name: signal-api
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount signal-cli data directory to persist accounts
+      - ${HOME}/.local/share/signal-api:/home/.local/share/signal-cli
+    environment:
+      - MODE=json-rpc
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/about"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # Python Bot with Auto-Reload
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: signal-bot
+    depends_on:
+      signal-api:
+        condition: service_healthy
+    volumes:
+      # Mount source code for live editing
+      - ./src:/app/src:ro
+      # Mount config files
+      - ./config.json:/app/config.json:ro
+      - ./.env:/app/.env:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      # Override URLs to use container network
+      - WS_BASE_URL=ws://signal-api:8080
+      - HTTP_BASE_URL=http://signal-api:8080
+    # Use watchmedo for auto-reload on file changes
+    command: >
+      sh -c "uv run watchmedo auto-restart
+      --patterns='*.py'
+      --recursive
+      --ignore-patterns='*/__pycache__/*;*/.venv/*'
+      --signal SIGTERM
+      -- uv run python src/main.py"
+    restart: unless-stopped
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
