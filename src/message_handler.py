@@ -463,9 +463,28 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 else:
                     system_prompt = user.current_system_instruction if user.current_system_instruction else None
 
-                # Debug: Print what we're sending to Claude/Bedrock
+                # Debug: Print what we're sending to Claude/Bedrock (sanitize images)
+                def sanitize_for_logging(history):
+                    """Remove image data from conversation history for logging"""
+                    sanitized = []
+                    for msg in history:
+                        msg_copy = {"role": msg["role"]}
+                        if isinstance(msg["content"], list):
+                            # Has mixed content (text + images)
+                            content_items = []
+                            for item in msg["content"]:
+                                if item.get("type") == "image":
+                                    content_items.append({"type": "image", "source": "[IMAGE DATA OMITTED]"})
+                                else:
+                                    content_items.append(item)
+                            msg_copy["content"] = content_items
+                        else:
+                            msg_copy["content"] = msg["content"]
+                        sanitized.append(msg_copy)
+                    return sanitized
+
                 print(f"DEBUG - System prompt: {system_prompt}")
-                print(f"DEBUG - Messages being sent: {conversation_history}")
+                print(f"DEBUG - Messages being sent: {sanitize_for_logging(conversation_history)}")
 
                 # Make API call with conversation history
                 if is_bedrock:
@@ -487,11 +506,64 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                         # All other models use direct model ID with v1:0
                         bedrock_model_id = f"anthropic.{base_model}-v1:0"
 
+                    # Bedrock requires strict alternating roles, so merge consecutive user messages
+                    def merge_consecutive_user_messages(messages):
+                        """Merge consecutive user messages for Bedrock API compatibility"""
+                        if not messages:
+                            return messages
+
+                        merged = []
+                        i = 0
+                        while i < len(messages):
+                            current = messages[i]
+
+                            # If this is a user message, collect all consecutive user messages
+                            if current["role"] == "user":
+                                user_contents = []
+
+                                # Collect this and all following user messages
+                                while i < len(messages) and messages[i]["role"] == "user":
+                                    content = messages[i]["content"]
+                                    # Handle both string and list content
+                                    if isinstance(content, str):
+                                        user_contents.append({"type": "text", "text": content})
+                                    elif isinstance(content, list):
+                                        user_contents.extend(content)
+                                    i += 1
+
+                                # Merge all user contents with newlines between text blocks
+                                merged_content = []
+                                text_parts = []
+                                for item in user_contents:
+                                    if item.get("type") == "text":
+                                        text_parts.append(item["text"])
+                                    else:
+                                        # If we have accumulated text, add it first
+                                        if text_parts:
+                                            merged_content.append({"type": "text", "text": "\n".join(text_parts)})
+                                            text_parts = []
+                                        # Add non-text item (like image)
+                                        merged_content.append(item)
+
+                                # Add any remaining text
+                                if text_parts:
+                                    merged_content.append({"type": "text", "text": "\n".join(text_parts)})
+
+                                merged.append({"role": "user", "content": merged_content})
+                            else:
+                                # Assistant message, keep as is
+                                merged.append(current)
+                                i += 1
+
+                        return merged
+
+                    bedrock_conversation = merge_consecutive_user_messages(conversation_history)
+
                     # Prepare Bedrock request body
                     bedrock_body = {
                         "anthropic_version": "bedrock-2023-05-31",
                         "max_tokens": 4096,
-                        "messages": conversation_history
+                        "messages": bedrock_conversation
                     }
                     if system_prompt:
                         bedrock_body["system"] = system_prompt
