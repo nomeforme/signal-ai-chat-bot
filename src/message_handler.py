@@ -429,6 +429,15 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     print(f"DEBUG - Message added to history but not responding (not mentioned)")
                     return
 
+                # Signal text formatting instructions (appended to all prompts)
+                signal_formatting = """
+Text Formatting: When formatting text, use Signal's syntax:
+- *italic* for italic text (not _italic_)
+- **bold** for bold text
+- `code` for monospace
+- ~strikethrough~ for strikethrough
+"""
+
                 # Build system prompt - add group chat context if needed
                 if user.group_id:
                     # Extract clean model name for identity
@@ -449,19 +458,22 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                     participants_text = ". ".join(participants) if participants else "other participants"
 
-                    group_context = f"""You are [{clean_model_name}]. 
-                    You are in a group chat with users and other AI bots. 
-                    Messages are prefixed with [participant] to indicate the participant. 
-                    Be parsimonious, if you wish to directly address another participant (which will notify them), 
+                    group_context = f"""You are [{clean_model_name}].
+                    You are in a group chat with users and other AI bots.
+                    Messages are prefixed with [participant] to indicate the participant.
+                    Be parsimonious, if you wish to directly address another participant (which will notify them),
                     mention their name in your response. {participants_text}.
                     """
 
                     if user.current_system_instruction:
-                        system_prompt = f"{user.current_system_instruction}\n\n{group_context}"
+                        system_prompt = f"{user.current_system_instruction}\n\n{group_context}\n\n{signal_formatting}"
                     else:
-                        system_prompt = group_context
+                        system_prompt = f"{group_context}\n\n{signal_formatting}"
                 else:
-                    system_prompt = user.current_system_instruction if user.current_system_instruction else None
+                    if user.current_system_instruction:
+                        system_prompt = f"{user.current_system_instruction}\n\n{signal_formatting}"
+                    else:
+                        system_prompt = signal_formatting
 
                 # Debug: Print what we're sending to Claude/Bedrock (sanitize images)
                 def sanitize_for_logging(history):

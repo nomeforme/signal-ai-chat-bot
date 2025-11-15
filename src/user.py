@@ -153,6 +153,7 @@ class User:
             payload = {
                 "number": self.bot_phone,  # Use the bot's phone number
                 "recipients": recipients,
+                "text_mode": "styled"  # Enable text formatting (bold, italic, monospace, strikethrough)
             }
             if chunk:
                 payload["message"] = chunk
