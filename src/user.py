@@ -17,6 +17,8 @@ class User:
         self.chat_session = None
         self.claude_history = []  # Store Claude conversation history
         self.image_size = config.DEFAULT_IMAGE_SIZE
+        # Privacy mode: defaults to config value, but can be overridden per user/group
+        self.privacy_mode = config.GROUP_PRIVACY_MODE
 
     def is_session_inactive(self, timeout=config.SESSION_TIMEOUT):
         if self.last_activity is None:
@@ -58,6 +60,13 @@ class User:
 
     def set_image_size(self, size):
         self.image_size = size
+
+    def set_privacy_mode(self, mode):
+        """Set privacy mode to 'opt-in' or 'opt-out'"""
+        if mode in ["opt-in", "opt-out"]:
+            self.privacy_mode = mode
+            return True
+        return False
 
     def send_message(self, content, attachment=None):
         url = f"{config.HTTP_BASE_URL}/v2/send"

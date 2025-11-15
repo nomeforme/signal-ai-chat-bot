@@ -7,6 +7,7 @@ import requests
 import google.generativeai as genai
 import anthropic
 import fal_client
+import config
 from config import *
 from user import User
 
@@ -14,14 +15,45 @@ genai.configure(api_key=os.environ["GOOGLE_AI_STUDIO_API"])
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 users = {}
-HELP_MESSAGE = f"""
-Available commands
+
+# Build formatted lists for help message
+models_list = '\n  '.join(VALID_MODELS)
+prompts_list = '\n  '.join(SYSTEM_INSTRUCTIONS.keys())
+sizes_list = '\n  '.join(IMAGE_SIZES.keys())
+
+def get_help_message(privacy_mode):
+    """Generate help message based on current privacy mode"""
+    if privacy_mode == "opt-in":
+        privacy_help = """💬 Group Chat Usage (Opt-In Mode):
+- @mention the bot to use commands or get responses
+- Prefix messages with . (dot) to include in conversation history without response
+- Messages without mention or . prefix are ignored (privacy-first)"""
+    else:
+        privacy_help = """💬 Group Chat Usage (Opt-Out Mode):
+- @mention the bot to use commands or get responses
+- Bot sees and learns from all group messages
+- Prefix messages with . (dot) to exclude from conversation history"""
+
+    return f"""
+📋 Available Commands:
 - !help: Show this help message
-- !cp [prompt_name]: Change system prompt: {', '.join(SYSTEM_INSTRUCTIONS.keys())}
-- !cm <model_number>: Change AI model {', '.join(VALID_MODELS)}
-- !cup <custom_prompt_number>: Set a custom system prompt
+- !cp <number>: Change system prompt
+- !cm <number>: Change AI model
+- !cup <text>: Set a custom system prompt
 - !im <prompt>: Generate an image
-- !is <size_numer>: Change image size {', '.join(IMAGE_SIZES.keys())}
+- !is <number>: Change image size
+- !privacy <opt-in|opt-out>: Change privacy mode for this chat
+
+{privacy_help}
+
+🤖 Available Models:
+  {models_list}
+
+💭 System Prompts:
+  {prompts_list}
+
+📐 Image Sizes:
+  {sizes_list}
 """
 
 
@@ -110,6 +142,14 @@ def handle_image_size_cmd(user, size_number):
     else:
         sizes_list = '\n'.join(IMAGE_SIZES.keys())
         user.send_message(f"Invalid image size. Available sizes:\n{sizes_list}")
+
+
+def handle_privacy_cmd(user, mode):
+    mode = mode.lower().strip()
+    if user.set_privacy_mode(mode):
+        user.send_message(f'Privacy mode changed to: "{mode}"')
+    else:
+        user.send_message("Invalid privacy mode. Use 'opt-in' or 'opt-out'.")
 
 
 def handle_generate_image_cmd(user, prompt):
@@ -338,26 +378,22 @@ def process_message(message: Dict):
                     print(f"DEBUG - Bot was mentioned!")
                     break
 
-        # Check if message should be stored in history
-        # Privacy-first: Only store if prefixed with "." OR bot is mentioned
-        store_in_history = content.startswith(".") or bot_mentioned
-        should_respond = bot_mentioned
-
-        if not store_in_history:
-            # Not prefixed with "." and bot not mentioned - ignore completely
-            print(f"DEBUG - Message not prefixed with '.' and bot not mentioned, ignoring")
-            return
-
-        # If message starts with ".", remove the prefix for processing
-        if content.startswith("."):
-            content = content[1:].lstrip()  # Remove "." and any following spaces
-            print(f"DEBUG - Opt-in message (started with '.'), storing in history")
+        # Store these for later privacy check (after user creation)
+        is_group_chat = True
     else:
         display_sender = sender_name if sender_name else sender
         print(f"Received message from {display_sender} ({sender}) at {timestamp}: {content}")
-        should_respond = True  # Always respond to DMs
+        is_group_chat = False
+        bot_mentioned = False
 
     # Handle empty messages (e.g., image-only messages)
+    if not content and not attachments:
+        return
+
+    # Clean content: Remove object replacement character (￼) that Signal adds for @mentions
+    # and strip whitespace
+    content = content.replace('\ufffc', '').strip()
+
     if not content and not attachments:
         return
 
@@ -371,10 +407,46 @@ def process_message(message: Dict):
         command = ""
         args = ""
 
+    # Create or get user object
     user = get_or_create_user(sender, group_id=group_id)
 
+    # Apply privacy filtering for group chats
+    if is_group_chat:
+        is_command = content.startswith("!")
+
+        # Check if message should be stored in history based on user's privacy mode
+        if user.privacy_mode == "opt-in":
+            # Opt-in mode: Only store if prefixed with "." OR bot is mentioned
+            store_in_history = content.startswith(".") or bot_mentioned
+            # Only respond if bot is mentioned (this includes commands)
+            should_respond = bot_mentioned
+
+            if not store_in_history:
+                print(f"DEBUG - [OPT-IN MODE] Message not prefixed with '.' and not mentioned, ignoring")
+                return
+
+            # If message starts with ".", remove the prefix for processing
+            if content.startswith("."):
+                content = content[1:].lstrip()  # Remove "." and any following spaces
+                print(f"DEBUG - [OPT-IN MODE] Opt-in message (started with '.'), storing in history")
+        else:
+            # Opt-out mode: Store all messages UNLESS prefixed with "."
+            if content.startswith("."):
+                # User explicitly opted out of this message
+                print(f"DEBUG - [OPT-OUT MODE] Message prefixed with '.', ignoring")
+                return
+
+            # Store all other messages (commands, mentions, and regular messages)
+            store_in_history = True
+            # Only respond if bot is mentioned (this includes commands)
+            should_respond = bot_mentioned
+            print(f"DEBUG - [OPT-OUT MODE] Storing message in history")
+    else:
+        # DMs always respond
+        should_respond = True
+
     if command == "!help":
-        user.send_message(HELP_MESSAGE)
+        user.send_message(get_help_message(user.privacy_mode))
     elif command == "!cp":
         handle_change_prompt_cmd(user, args)
     elif command == "!cm":
@@ -385,5 +457,7 @@ def process_message(message: Dict):
         handle_generate_image_cmd(user, args)
     elif command == "!is":
         handle_image_size_cmd(user, args)
+    elif command == "!privacy":
+        handle_privacy_cmd(user, args)
     else:
         handle_ai_message(user, content, attachments, sender_name=sender_name, should_respond=should_respond)

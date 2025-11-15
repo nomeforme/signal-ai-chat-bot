@@ -86,12 +86,31 @@ There is a successor project using a signal bot as an MCP (Model Context Protoco
 
 Once the bot is running, you can interact with it via Signal messages. Available commands include:
 
-- `!help`: Show help message
+- `!help`: Show help message with current settings
 - `!cp [prompt_name]`: Change system prompt
 - `!cm <model_number>`: Change AI model
 - `!cup <custom_prompt>`: Set a custom system prompt
 - `!im <prompt>`: Generate an image (trusted users only)
 - `!is <size_number>`: Change image size
+- `!privacy <opt-in|opt-out>`: Change privacy mode for the current chat
+
+### Group Chat Privacy Modes
+
+The bot supports two privacy modes for group chats:
+
+**Opt-In Mode (default - privacy-first):**
+- Only stores messages that start with `.` (dot) OR when bot is @mentioned
+- Bot only responds when @mentioned or to commands
+- All other messages are completely ignored
+- Best for privacy-conscious groups
+
+**Opt-Out Mode (convenience-first):**
+- Bot sees and stores ALL group messages in conversation history
+- Bot only responds when @mentioned or to commands
+- Prefix messages with `.` to explicitly exclude them from history
+- Best for casual groups where everyone is comfortable with the bot learning context
+
+You can switch modes anytime with `!privacy opt-in` or `!privacy opt-out`. The setting is per-chat (each group and DM has its own privacy mode).
 
 ## Configuration
 
