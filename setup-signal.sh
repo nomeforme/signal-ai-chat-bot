@@ -40,12 +40,18 @@ if ! curl -s http://localhost:8080/v1/about > /dev/null 2>&1; then
         exit 1
     fi
 
-    # Start signal-cli-rest-api
-    $CONTAINER_CMD run -d --name signal-api \
-        -p 8080:8080 \
-        -v $HOME/.local/share/signal-api:/home/.local/share/signal-cli \
-        -e 'MODE=json-rpc' \
-        bbernhard/signal-cli-rest-api
+    # Check if container exists but is stopped
+    if $CONTAINER_CMD ps -a --format '{{.Names}}' | grep -q '^signal-api$'; then
+        echo "📦 Container exists but is stopped. Starting it..."
+        $CONTAINER_CMD start signal-api
+    else
+        # Start signal-cli-rest-api
+        $CONTAINER_CMD run -d --name signal-api \
+            -p 8080:8080 \
+            -v $HOME/.local/share/signal-api:/home/.local/share/signal-cli \
+            -e 'MODE=json-rpc' \
+            bbernhard/signal-cli-rest-api
+    fi
 
     echo "⏳ Waiting for signal-cli-rest-api to start..."
     sleep 5
