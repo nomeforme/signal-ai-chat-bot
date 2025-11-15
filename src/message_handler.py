@@ -538,6 +538,7 @@ def process_message(message: Dict, bot_phone: str = None):
     timestamp = datetime.fromtimestamp(message["envelope"]["timestamp"] / 1000.0)
     attachments = message["envelope"]["dataMessage"].get("attachments", [])
     mentions = message["envelope"]["dataMessage"].get("mentions", [])
+    quote = message["envelope"]["dataMessage"].get("quote")  # Check if this is a reply/quote
 
     # Log entry to process_message to track which bot is handling this
     print(f"DEBUG - [{bot_phone}] process_message() starting for sender {sender} (number: {sender_number}) at {timestamp}")
@@ -561,9 +562,24 @@ def process_message(message: Dict, bot_phone: str = None):
         print(f"Received GROUP message from {display_sender} ({sender_uuid[:8]}...) in {group_id[:30]}... at {timestamp}: {content}")
         print(f"DEBUG - Mentions: {mentions}")
 
-        # In group chats, only respond if the bot is mentioned
+        # In group chats, only respond if the bot is mentioned OR quoted
         bot_mentioned = False
-        if mentions:
+
+        # Check if message is quoting/replying to the bot
+        if quote:
+            bot_uuid = get_bot_uuid(bot_phone)
+            quote_author = quote.get("author")
+            quote_author_uuid = quote.get("authorUuid")
+
+            print(f"DEBUG - Message is a reply to: author={quote_author}, uuid={quote_author_uuid}")
+
+            # Check if the quoted message is from this bot
+            if quote_author == bot_phone or (bot_uuid and quote_author_uuid == bot_uuid):
+                bot_mentioned = True
+                print(f"DEBUG - Bot was quoted/replied to!")
+
+        # Check for @mentions
+        if mentions and not bot_mentioned:
             # Get this bot's UUID for comparison
             bot_uuid = get_bot_uuid(bot_phone)
             print(f"DEBUG - Bot UUID for {bot_phone}: {bot_uuid}")
