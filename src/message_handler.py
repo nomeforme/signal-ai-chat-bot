@@ -6,6 +6,8 @@ from PIL import Image
 import requests
 import google.generativeai as genai
 import anthropic
+import boto3
+import json as json_module
 import fal_client
 import config
 from config import *
@@ -13,6 +15,16 @@ from user import User
 
 genai.configure(api_key=os.environ["GOOGLE_AI_STUDIO_API"])
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+
+# Initialize Bedrock client (will only be used if AWS credentials are present)
+bedrock_client = None
+if os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY"):
+    bedrock_client = boto3.client(
+        service_name='bedrock-runtime',
+        region_name=os.environ.get("AWS_REGION", "us-east-1"),
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY")
+    )
 
 users = {}
 bot_uuid_cache = {}  # Cache for bot phone -> UUID mapping
@@ -334,7 +346,8 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
     message_components = [content] if content else []
 
     model_name = user.current_model.split(" ")[1]
-    is_claude = model_name.startswith("claude-")
+    is_bedrock = model_name.startswith("bedrock-")
+    is_claude = model_name.startswith("claude-") or is_bedrock
 
     # Process attachments for image understanding
     image_contents = []
@@ -450,24 +463,65 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 else:
                     system_prompt = user.current_system_instruction if user.current_system_instruction else None
 
-                # Debug: Print what we're sending to Claude
+                # Debug: Print what we're sending to Claude/Bedrock
                 print(f"DEBUG - System prompt: {system_prompt}")
                 print(f"DEBUG - Messages being sent: {conversation_history}")
 
                 # Make API call with conversation history
-                api_params = {
-                    "model": model_name,
-                    "max_tokens": 4096,
-                    "messages": conversation_history
-                }
-                if system_prompt:
-                    api_params["system"] = system_prompt
+                if is_bedrock:
+                    # Use AWS Bedrock
+                    if not bedrock_client:
+                        raise Exception("AWS Bedrock credentials not configured. Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY in .env")
 
-                response = anthropic_client.messages.create(**api_params)
+                    # Convert model name to Bedrock format
+                    # Claude 3.5 Sonnet v2 (20241022) requires cross-region inference profile
+                    # bedrock-claude-3-5-sonnet-20241022 -> us.anthropic.claude-3-5-sonnet-20241022-v2:0
+                    # All other models use direct model IDs
+                    # bedrock-claude-3-haiku-20240307 -> anthropic.claude-3-haiku-20240307-v1:0
+                    base_model = model_name.replace("bedrock-", "")
 
-                print(f"DEBUG - Claude's raw response: {response.content[0].text}")
+                    # Claude 3.5 Sonnet October 2024 uses inference profile with v2:0
+                    if "claude-3-5-sonnet-20241022" in model_name:
+                        bedrock_model_id = f"us.anthropic.{base_model}-v2:0"
+                    else:
+                        # All other models use direct model ID with v1:0
+                        bedrock_model_id = f"anthropic.{base_model}-v1:0"
 
-                ai_response = response.content[0].text
+                    # Prepare Bedrock request body
+                    bedrock_body = {
+                        "anthropic_version": "bedrock-2023-05-31",
+                        "max_tokens": 4096,
+                        "messages": conversation_history
+                    }
+                    if system_prompt:
+                        bedrock_body["system"] = system_prompt
+
+                    print(f"DEBUG - Calling Bedrock with model: {bedrock_model_id}")
+
+                    bedrock_response = bedrock_client.invoke_model(
+                        modelId=bedrock_model_id,
+                        body=json_module.dumps(bedrock_body)
+                    )
+
+                    response_body = json_module.loads(bedrock_response['body'].read())
+                    print(f"DEBUG - Bedrock raw response: {response_body}")
+
+                    ai_response = response_body['content'][0]['text']
+                else:
+                    # Use direct Anthropic API
+                    api_params = {
+                        "model": model_name,
+                        "max_tokens": 4096,
+                        "messages": conversation_history
+                    }
+                    if system_prompt:
+                        api_params["system"] = system_prompt
+
+                    response = anthropic_client.messages.create(**api_params)
+
+                    print(f"DEBUG - Claude's raw response: {response.content[0].text}")
+
+                    ai_response = response.content[0].text
 
                 # Strip any [prefix]: that Claude might have added despite instructions
                 import re

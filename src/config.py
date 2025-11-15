@@ -98,6 +98,12 @@ VALID_MODELS = [
     "(10) claude-sonnet-4-5-20250929",
     "(11) claude-opus-4-20250514",
     "(12) claude-opus-4-1-20250805",
+    "(13) bedrock-claude-3-haiku-20240307",
+    "(14) bedrock-claude-3-sonnet-20240229",
+    "(15) bedrock-claude-3-5-haiku-20241022",
+    "(16) bedrock-claude-3-5-sonnet-20240620",
+    "(17) bedrock-claude-3-5-sonnet-20241022",
+    "(18) bedrock-claude-3-7-sonnet-20250219",
 ]
 DEFAULT_MODEL = CONFIG.get("default_model", "(6) claude-haiku-4-5-20251001")
 LORA_PATH_TO_URL = CONFIG.get("lora_path_to_url", {})
