@@ -69,6 +69,68 @@ class User:
             return True
         return False
 
+    def _split_message(self, content, max_length=400):
+        """Split long messages into chunks to avoid 'see more' in Signal"""
+        if not content or len(content) <= max_length:
+            return [content] if content else []
+
+        chunks = []
+        lines = content.split('\n')
+        current_chunk = []
+        current_length = 0
+
+        for line in lines:
+            line_length = len(line) + 1  # +1 for newline
+
+            # If a single line is longer than max_length, split it by sentences/words
+            if line_length > max_length:
+                # First, flush current chunk if any
+                if current_chunk:
+                    chunks.append('\n'.join(current_chunk))
+                    current_chunk = []
+                    current_length = 0
+
+                # Split long line by sentences
+                sentences = line.replace('. ', '.\n').split('\n')
+                for sentence in sentences:
+                    if len(sentence) > max_length:
+                        # If sentence is still too long, split by words
+                        words = sentence.split(' ')
+                        temp_chunk = []
+                        temp_length = 0
+                        for word in words:
+                            word_length = len(word) + 1
+                            if temp_length + word_length > max_length:
+                                chunks.append(' '.join(temp_chunk))
+                                temp_chunk = [word]
+                                temp_length = word_length
+                            else:
+                                temp_chunk.append(word)
+                                temp_length += word_length
+                        if temp_chunk:
+                            chunks.append(' '.join(temp_chunk))
+                    elif current_length + len(sentence) + 1 > max_length:
+                        chunks.append('\n'.join(current_chunk))
+                        current_chunk = [sentence]
+                        current_length = len(sentence)
+                    else:
+                        current_chunk.append(sentence)
+                        current_length += len(sentence) + 1
+            elif current_length + line_length > max_length:
+                # This line would exceed limit, start new chunk
+                chunks.append('\n'.join(current_chunk))
+                current_chunk = [line]
+                current_length = line_length
+            else:
+                current_chunk.append(line)
+                current_length += line_length
+
+        # Add remaining chunk
+        if current_chunk:
+            chunks.append('\n'.join(current_chunk))
+
+        return chunks
+
     def send_message(self, content, attachment=None, mentions=None):
         url = f"{config.HTTP_BASE_URL}/v2/send"
 
@@ -80,26 +142,41 @@ class User:
             recipients = [self.phone_number]
             recipient_display = self.phone_number
 
-        payload = {
-            "number": self.bot_phone,  # Use the bot's phone number
-            "recipients": recipients,
-        }
+        # Split long messages into multiple chunks
         if isinstance(content, str):
-            payload["message"] = content
-        if attachment:
-            encoded = base64.b64encode(attachment).decode("utf-8")
-            payload["base64_attachments"] = [encoded]
-        if mentions:
-            payload["mentions"] = mentions
-        try:
-            response = requests.post(url, json=payload)
-            response.raise_for_status()
-            print(f"Message sent successfully to {recipient_display}")
-            if mentions:
-                print(f"DEBUG - Mentions sent: {mentions}")
-        except requests.RequestException as e:
-            print(f"Error sending message: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                print(f"Response status: {e.response.status_code}")
-                print(f"Response content: {e.response.text}")
-            print(f"Payload sent: {payload}")
+            message_chunks = self._split_message(content)
+        else:
+            message_chunks = [content] if content else []
+
+        # Send each chunk as a separate message
+        for i, chunk in enumerate(message_chunks):
+            payload = {
+                "number": self.bot_phone,  # Use the bot's phone number
+                "recipients": recipients,
+            }
+            if chunk:
+                payload["message"] = chunk
+
+            # Only attach file and mentions to the first message
+            if i == 0:
+                if attachment:
+                    encoded = base64.b64encode(attachment).decode("utf-8")
+                    payload["base64_attachments"] = [encoded]
+                if mentions:
+                    payload["mentions"] = mentions
+
+            try:
+                response = requests.post(url, json=payload)
+                response.raise_for_status()
+                if len(message_chunks) > 1:
+                    print(f"Message chunk {i+1}/{len(message_chunks)} sent successfully to {recipient_display}")
+                else:
+                    print(f"Message sent successfully to {recipient_display}")
+                if i == 0 and mentions:
+                    print(f"DEBUG - Mentions sent: {mentions}")
+            except requests.RequestException as e:
+                print(f"Error sending message chunk {i+1}: {e}")
+                if hasattr(e, 'response') and e.response is not None:
+                    print(f"Response status: {e.response.status_code}")
+                    print(f"Response content: {e.response.text}")
+                print(f"Payload sent: {payload}")
