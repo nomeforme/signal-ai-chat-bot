@@ -62,6 +62,10 @@ def get_bot_uuid(bot_phone):
             Path.home() / ".local/share/signal-api/data/accounts.json"  # Non-container
         ]
 
+        print(f"{Fore.YELLOW}[DEBUG] Looking for accounts.json in paths:{Style.RESET_ALL}")
+        for path in possible_paths:
+            print(f"{Fore.YELLOW}[DEBUG]   - {path}: {'EXISTS' if path.exists() else 'NOT FOUND'}{Style.RESET_ALL}")
+
         accounts_file = None
         for path in possible_paths:
             if path.exists():
@@ -69,14 +73,19 @@ def get_bot_uuid(bot_phone):
                 break
 
         if accounts_file:
+            print(f"{Fore.YELLOW}[DEBUG] Reading accounts from: {accounts_file}{Style.RESET_ALL}")
             with open(accounts_file, 'r') as f:
                 data = json.load(f)
+                print(f"{Fore.YELLOW}[DEBUG] Accounts file contents: {json.dumps(data, indent=2)}{Style.RESET_ALL}")
                 for account in data.get("accounts", []):
                     if account.get("number") == bot_phone:
                         uuid = account.get("uuid")
                         if uuid:
                             bot_uuid_cache[bot_phone] = uuid
+                            print(f"{Fore.GREEN}[DEBUG] Found UUID for {bot_phone}: {uuid}{Style.RESET_ALL}")
                             return uuid
+        else:
+            print(f"{Fore.RED}[DEBUG] No accounts.json file found in any of the searched paths!{Style.RESET_ALL}")
     except Exception as e:
         print(f"Warning: Could not fetch UUID for {bot_phone}: {e}")
 

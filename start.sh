@@ -56,7 +56,7 @@ echo "⏳ Waiting for services to be ready..."
 sleep 5
 
 # Check if services are running
-if $COMPOSE_CMD ps | grep -q "signal-api.*running"; then
+if $COMPOSE_CMD ps | grep -q "signal-api.*Up"; then
     echo "✅ signal-api is running"
 else
     echo "❌ signal-api failed to start"
@@ -64,7 +64,7 @@ else
     exit 1
 fi
 
-if $COMPOSE_CMD ps | grep -q "signal-bot.*running"; then
+if $COMPOSE_CMD ps | grep -q "signal-bot.*Up"; then
     echo "✅ signal-bot is running with auto-reload"
 else
     echo "❌ signal-bot failed to start"
