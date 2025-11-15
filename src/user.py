@@ -69,7 +69,7 @@ class User:
             return True
         return False
 
-    def send_message(self, content, attachment=None):
+    def send_message(self, content, attachment=None, mentions=None):
         url = f"{config.HTTP_BASE_URL}/v2/send"
 
         # If this is a group chat, send to the group; otherwise send to individual
@@ -89,10 +89,14 @@ class User:
         if attachment:
             encoded = base64.b64encode(attachment).decode("utf-8")
             payload["base64_attachments"] = [encoded]
+        if mentions:
+            payload["mentions"] = mentions
         try:
             response = requests.post(url, json=payload)
             response.raise_for_status()
             print(f"Message sent successfully to {recipient_display}")
+            if mentions:
+                print(f"DEBUG - Mentions sent: {mentions}")
         except requests.RequestException as e:
             print(f"Error sending message: {e}")
             if hasattr(e, 'response') and e.response is not None:

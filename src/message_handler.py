@@ -17,6 +17,7 @@ anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY
 users = {}
 bot_uuid_cache = {}  # Cache for bot phone -> UUID mapping
 group_histories = {}  # Shared conversation history for group chats: {group_id: [messages]}
+user_name_to_phone = {}  # Cache for mapping display names to phone numbers
 
 def get_bot_uuid(bot_phone):
     """Get the UUID for a bot's phone number by querying Signal API"""
@@ -49,6 +50,73 @@ def get_bot_uuid(bot_phone):
         print(f"Warning: Could not fetch UUID for {bot_phone}: {e}")
 
     return None
+
+def detect_mentions_in_text(text, group_id=None):
+    """
+    Detect bot names and user names in text and return mentions array.
+    Returns: (modified_text, mentions_array)
+
+    mentions_array format: [{"start": int, "length": int, "author": "phone_number"}, ...]
+    where start and length are in UTF-16 code units
+    """
+    if not text or not group_id:
+        return text, []
+
+    mentions = []
+    modified_text = text
+    offset = 0  # Track offset as we replace text with mention characters
+
+    # Build a list of names to search for:
+    # 1. Bot names from config
+    bot_name_to_phone = {}
+    for bot in config.BOT_INSTANCES:
+        bot_name_to_phone[bot["name"]] = bot["phone"]
+
+    # 2. User names from cache (populated when we see messages)
+    # Combine both dictionaries
+    name_to_phone = {**bot_name_to_phone, **user_name_to_phone}
+
+    # Sort names by length (longest first) to avoid partial matches
+    sorted_names = sorted(name_to_phone.keys(), key=len, reverse=True)
+
+    for name in sorted_names:
+        phone = name_to_phone[name]
+
+        # Find all occurrences of this name
+        search_pos = 0
+        while True:
+            pos = modified_text.find(name, search_pos)
+            if pos == -1:
+                break
+
+            # Check if this is a word boundary (not in middle of another word)
+            # Simple heuristic: check character before and after
+            before_ok = pos == 0 or modified_text[pos-1] in ' \n\t,.:;!?@'
+            after_ok = pos + len(name) >= len(modified_text) or modified_text[pos + len(name)] in ' \n\t,.:;!?'
+
+            if before_ok and after_ok:
+                # Calculate UTF-16 position (for proper Signal mention indexing)
+                utf16_start = len(modified_text[:pos].encode('utf-16-le')) // 2
+
+                # Replace the name with Signal's object replacement character
+                replacement = '\ufffc'  # Object replacement character
+                modified_text = modified_text[:pos] + replacement + modified_text[pos + len(name):]
+
+                # Add mention as object (not string) with fields: start, length, author
+                # Length is always 1 because we're replacing with single character
+                print(f"DEBUG - Creating mention for '{name}' -> phone: {phone}")
+                mentions.append({
+                    "start": utf16_start,
+                    "length": 1,
+                    "author": phone
+                })
+
+                # Continue search after this replacement
+                search_pos = pos + 1
+            else:
+                search_pos = pos + 1
+
+    return modified_text, mentions
 
 # Build formatted lists for help message
 models_list = '\n  '.join(VALID_MODELS)
@@ -353,10 +421,16 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     # Extract clean model name for identity
                     clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
 
+                    # Build list of other bots in the chat
+                    other_bots = [bot["name"] for bot in config.BOT_INSTANCES if bot["phone"] != user.bot_phone]
+                    other_bots_text = ", ".join(other_bots) if other_bots else "other AIs"
+
+                    group_context = f"You are [{clean_model_name}]. You are in a group chat with users and other AIs. Messages are prefixed with [username/AI name] to indicate the participant. To directly address another participant (which will notify them), mention their name in your response. Other bots in this chat: {other_bots_text}."
+
                     if user.current_system_instruction:
-                        system_prompt = f"{user.current_system_instruction}\n\nNote: You are [{clean_model_name}]. You are in a group chat with users and other AIs. Messages are prefixed with [username/AI name] to indicate the participant."
+                        system_prompt = f"{user.current_system_instruction}\n\n{group_context}"
                     else:
-                        system_prompt = f"You are [{clean_model_name}]. You are in a group chat with users and other AIs. Messages are prefixed with [username/AI name] to indicate the participant."
+                        system_prompt = group_context
                 else:
                     system_prompt = user.current_system_instruction if user.current_system_instruction else None
 
@@ -417,8 +491,17 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
             print(f"Error generating AI response: {e}")
             ai_response = "Sorry, I couldn't generate a response at this time."
 
-        # Send the clean response (without prefix) to the user
-        user.send_message(ai_response)
+        # Detect mentions in the response (for group chats only)
+        if user.group_id:
+            modified_response, mention_array = detect_mentions_in_text(ai_response, user.group_id)
+            if mention_array:
+                print(f"DEBUG - Detected mentions in response: {mention_array}")
+                print(f"DEBUG - Original: {ai_response}")
+                print(f"DEBUG - Modified: {modified_response}")
+            user.send_message(modified_response, mentions=mention_array if mention_array else None)
+        else:
+            # DMs don't need mention detection
+            user.send_message(ai_response)
     else:
         user.send_message("I received your message, but it seems to be empty.")
 
@@ -432,6 +515,7 @@ def process_message(message: Dict, bot_phone: str = None):
         bot_phone = config.SIGNAL_PHONE_NUMBER
 
     sender = message["envelope"]["source"]
+    sender_number = message["envelope"].get("sourceNumber")  # Phone number if available
     sender_uuid = message["envelope"].get("sourceUuid", "")
     sender_name = message["envelope"].get("sourceName", "")  # This might have the profile name
     content = message["envelope"]["dataMessage"].get("message", "") or ""
@@ -440,7 +524,15 @@ def process_message(message: Dict, bot_phone: str = None):
     mentions = message["envelope"]["dataMessage"].get("mentions", [])
 
     # Log entry to process_message to track which bot is handling this
-    print(f"DEBUG - [{bot_phone}] process_message() starting for sender {sender} at {timestamp}")
+    print(f"DEBUG - [{bot_phone}] process_message() starting for sender {sender} (number: {sender_number}) at {timestamp}")
+
+    # Cache sender name for mention detection (if we have a name)
+    # Prefer sourceNumber over source (which might be UUID)
+    sender_phone = sender_number if sender_number else (sender if sender.startswith('+') else None)
+
+    if sender_name and sender_phone:
+        user_name_to_phone[sender_name] = sender_phone
+        print(f"DEBUG - Cached name '{sender_name}' -> phone: {sender_phone}")
 
     # Check if this is a group message
     group_info = message["envelope"]["dataMessage"].get("groupInfo")
