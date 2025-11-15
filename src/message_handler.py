@@ -350,10 +350,13 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                 # Build system prompt - add group chat context if needed
                 if user.group_id:
+                    # Extract clean model name for identity
+                    clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
+
                     if user.current_system_instruction:
-                        system_prompt = f"{user.current_system_instruction}\n\nNote: You are in a group chat. User messages are prefixed with [username] to indicate who is speaking. Do not include any prefix in your own responses."
+                        system_prompt = f"{user.current_system_instruction}\n\nNote: You are [{clean_model_name}]. You are in a group chat with users and other AIs. Messages are prefixed with [username/AI name] to indicate the participant."
                     else:
-                        system_prompt = "You are in a group chat. User messages are prefixed with [username] to indicate who is speaking. Do not include any prefix in your own responses."
+                        system_prompt = f"You are [{clean_model_name}]. You are in a group chat with users and other AIs. Messages are prefixed with [username/AI name] to indicate the participant."
                 else:
                     system_prompt = user.current_system_instruction if user.current_system_instruction else None
 
