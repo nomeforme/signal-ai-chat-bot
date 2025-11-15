@@ -439,6 +439,9 @@ def process_message(message: Dict, bot_phone: str = None):
     attachments = message["envelope"]["dataMessage"].get("attachments", [])
     mentions = message["envelope"]["dataMessage"].get("mentions", [])
 
+    # Log entry to process_message to track which bot is handling this
+    print(f"DEBUG - [{bot_phone}] process_message() starting for sender {sender} at {timestamp}")
+
     # Check if this is a group message
     group_info = message["envelope"]["dataMessage"].get("groupInfo")
     group_id = None
