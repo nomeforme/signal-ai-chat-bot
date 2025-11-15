@@ -433,6 +433,10 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     print(f"DEBUG - Message added to history but not responding (not mentioned)")
                     return
 
+                # Check if bot has tools enabled (needed for system prompt and later)
+                bot_config = config.BOT_CONFIGS.get(user.bot_phone, {})
+                tools_enabled = bot_config.get("tools", [])
+
                 # Signal text formatting instructions (appended to all prompts)
                 signal_formatting = """
                     Text Formatting: When formatting text, use Signal's syntax:
@@ -479,6 +483,9 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     else:
                         system_prompt = signal_formatting
 
+                # Note: Bedrock supports tool use with the same format as Anthropic API
+                # We'll add tools to the Bedrock request body below
+
                 # Debug: Print what we're sending to Claude/Bedrock (sanitize images)
                 def sanitize_for_logging(history):
                     """Remove image data from conversation history for logging"""
@@ -501,10 +508,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                 print(f"DEBUG - System prompt: {system_prompt}")
                 print(f"DEBUG - Messages being sent: {sanitize_for_logging(conversation_history)}")
-
-                # Check if bot has tools enabled (for later history update logic)
-                bot_config = config.BOT_CONFIGS.get(user.bot_phone, {})
-                tools_enabled = bot_config.get("tools", [])
 
                 # Make API call with conversation history
                 if is_bedrock:
@@ -588,17 +591,78 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     if system_prompt:
                         bedrock_body["system"] = system_prompt
 
+                    # Add tools if enabled (Bedrock supports same format as Anthropic)
+                    if tools_enabled:
+                        agent = create_agent_from_config(bot_config, system_prompt)
+                        bedrock_body["tools"] = agent.get_anthropic_tools()
+                        print(f"DEBUG - Bedrock tools enabled: {tools_enabled}")
+
                     print(f"DEBUG - Calling Bedrock with model: {bedrock_model_id}")
 
-                    bedrock_response = bedrock_client.invoke_model(
-                        modelId=bedrock_model_id,
-                        body=json_module.dumps(bedrock_body)
-                    )
+                    # Handle tool use loop for Bedrock
+                    max_tool_rounds = 5
+                    tool_rounds = 0
+                    working_messages = bedrock_conversation.copy()
 
-                    response_body = json_module.loads(bedrock_response['body'].read())
-                    print(f"DEBUG - Bedrock raw response: {response_body}")
+                    while tool_rounds < max_tool_rounds:
+                        bedrock_body["messages"] = working_messages
 
-                    ai_response = response_body['content'][0]['text']
+                        bedrock_response = bedrock_client.invoke_model(
+                            modelId=bedrock_model_id,
+                            body=json_module.dumps(bedrock_body)
+                        )
+
+                        response_body = json_module.loads(bedrock_response['body'].read())
+                        print(f"DEBUG - Bedrock raw response: {response_body}")
+
+                        stop_reason = response_body.get('stop_reason')
+
+                        if stop_reason == 'tool_use' and tools_enabled:
+                            # Extract tool use and execute
+                            tool_results = []
+                            for block in response_body['content']:
+                                if block.get('type') == 'tool_use':
+                                    tool_name = block['name']
+                                    tool_input = block['input']
+                                    tool_id = block['id']
+
+                                    print(f"DEBUG - Bedrock requesting tool: {tool_name}")
+
+                                    # Execute tool
+                                    result = asyncio.run(agent.execute_tool(tool_name, tool_input))
+
+                                    tool_results.append({
+                                        "type": "tool_result",
+                                        "tool_use_id": tool_id,
+                                        "content": result
+                                    })
+
+                            # Add assistant response with tool use
+                            working_messages.append({
+                                "role": "assistant",
+                                "content": response_body['content']
+                            })
+
+                            # Add tool results
+                            working_messages.append({
+                                "role": "user",
+                                "content": tool_results
+                            })
+
+                            tool_rounds += 1
+                            continue
+
+                        # Extract final text response
+                        text_parts = []
+                        for block in response_body['content']:
+                            if block.get('type') == 'text':
+                                text_parts.append(block['text'])
+
+                        ai_response = '\n'.join(text_parts) if text_parts else "Sorry, I couldn't generate a response."
+                        break
+
+                    if tool_rounds >= max_tool_rounds:
+                        ai_response = "Sorry, I got stuck in a tool use loop."
                 else:
                     # Use direct Anthropic API with agent system
                     if tools_enabled:
