@@ -826,12 +826,15 @@ def process_message(message: Dict, bot_phone: str = None):
             # Get this bot's UUID for comparison
             bot_uuid = get_bot_uuid(bot_phone)
             print(f"{Fore.CYAN}[IDENTITY] Bot {bot_phone} UUID: {bot_uuid}{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}[IDENTITY] Checking {len(mentions)} mention(s)...{Style.RESET_ALL}")
 
             # Check if any mention is for the bot (by UUID or phone number)
-            for mention in mentions:
+            for i, mention in enumerate(mentions):
                 # Mentions can have 'uuid' or 'number' field
                 mention_uuid = mention.get("uuid")
                 mention_number = mention.get("number")
+
+                print(f"{Fore.YELLOW}[IDENTITY] Mention {i+1}: uuid={mention_uuid}, number={mention_number}{Style.RESET_ALL}")
 
                 # Check if the mention matches this bot's phone number
                 if mention_number == bot_phone:
@@ -844,6 +847,8 @@ def process_message(message: Dict, bot_phone: str = None):
                     bot_mentioned = True
                     print(f"{Fore.GREEN}[IDENTITY] ✓ Bot mentioned by UUID!{Style.RESET_ALL}")
                     break
+
+                print(f"{Fore.RED}[IDENTITY] ✗ Mention {i+1} did not match this bot{Style.RESET_ALL}")
 
         # Store these for later privacy check (after user creation)
         is_group_chat = True

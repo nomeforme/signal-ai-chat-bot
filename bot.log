@@ -1,0 +1,1831 @@
+warning: The `tool.uv.dev-dependencies` field (used in `pyproject.toml`) is deprecated and will be removed in a future release; use `dependency-groups.dev` instead
+Starting 12 bot instance(s)...
+[+12186633092] WebSocket connection opened
+[+19785927807] WebSocket connection opened
+[+14436585111] WebSocket connection opened
+[+14056436903] WebSocket connection opened
+[+15745661704] WebSocket connection opened
+[+12052240154] WebSocket connection opened
+[+17602847933] WebSocket connection opened
+[+17753178238] WebSocket connection opened
+[+14406167807] WebSocket connection opened
+[+12052028562] WebSocket connection opened
+[+18135822472] WebSocket connection opened
+[+18046894966] WebSocket connection opened
+
+All 12 bot(s) started. Press Ctrl+C to stop.
+Smart message consistency checking: ACTIVE
+  → Mentioned bots that miss messages will auto-reconnect and respond
+  → Non-mentioned bots that miss messages will be ignored
+
+Health monitor started - checking for dead threads and cleaning up old message tracking
+Received message from 0xG (59e21fdb-7fcc-49b8-9eae-a343f4a7a654) at 2025-11-15 20:20:59.607000: aa
+Message sent successfully to 59e21fdb-7fcc-49b8-9eae-a343f4a7a654
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +12186633092: 674b3e6a-41b8-441e-828f-d8be895d0d96
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +19785927807: 36c527c5-1b31-4e7f-bd74-82c5f957cf92
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +14436585111: bd827158-c5fb-4104-9267-a16a8d6cf0b8
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +14056436903: 4cf7879b-90b5-4dd4-8c45-1ac2ded566df
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +15745661704: d6126711-1a3f-4c04-a843-1a7b6e59fbbb
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +12052240154: 7f6a9680-c15a-4d6f-bb01-234b371dc237
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +17602847933: 08326a90-8f17-43e4-9477-337a18789a15
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +17753178238: 45b35f09-0027-463d-b604-1f577f9ee66a
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +14406167807: a68dd2d0-cf3f-43be-a5f8-77401d26620c
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +12052028562: 6d3f982e-16e8-43b6-a56f-f045c6170b6b
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +18135822472: e51252df-76d0-4f85-8a2d-2a7f6049122f
+[DEBUG] Looking for accounts.json in paths:
+[DEBUG]   - /home/.local/share/signal-api/data/accounts.json: NOT FOUND
+[DEBUG]   - /root/.local/share/signal-api/data/accounts.json: EXISTS
+[DEBUG] Reading accounts from: /root/.local/share/signal-api/data/accounts.json
+[DEBUG] Accounts file contents: {
+  "accounts": [
+    {
+      "path": "277473",
+      "environment": "LIVE",
+      "number": "+12186633092",
+      "uuid": "674b3e6a-41b8-441e-828f-d8be895d0d96"
+    },
+    {
+      "path": "488985",
+      "environment": "LIVE",
+      "number": "+19785927807",
+      "uuid": "36c527c5-1b31-4e7f-bd74-82c5f957cf92"
+    },
+    {
+      "path": "433740",
+      "environment": "LIVE",
+      "number": "+14436585111",
+      "uuid": "bd827158-c5fb-4104-9267-a16a8d6cf0b8"
+    },
+    {
+      "path": "241198",
+      "environment": "LIVE",
+      "number": "+14056436903",
+      "uuid": "4cf7879b-90b5-4dd4-8c45-1ac2ded566df"
+    },
+    {
+      "path": "959392",
+      "environment": "LIVE",
+      "number": "+15745661704",
+      "uuid": "d6126711-1a3f-4c04-a843-1a7b6e59fbbb"
+    },
+    {
+      "path": "805032",
+      "environment": "LIVE",
+      "number": "+12052240154",
+      "uuid": "7f6a9680-c15a-4d6f-bb01-234b371dc237"
+    },
+    {
+      "path": "337546",
+      "environment": "LIVE",
+      "number": "+17602847933",
+      "uuid": "08326a90-8f17-43e4-9477-337a18789a15"
+    },
+    {
+      "path": "210942",
+      "environment": "LIVE",
+      "number": "+17753178238",
+      "uuid": "45b35f09-0027-463d-b604-1f577f9ee66a"
+    },
+    {
+      "path": "594497",
+      "environment": "LIVE",
+      "number": "+14406167807",
+      "uuid": "a68dd2d0-cf3f-43be-a5f8-77401d26620c"
+    },
+    {
+      "path": "239920",
+      "environment": "LIVE",
+      "number": "+12052028562",
+      "uuid": "6d3f982e-16e8-43b6-a56f-f045c6170b6b"
+    },
+    {
+      "path": "574845",
+      "environment": "LIVE",
+      "number": "+18135822472",
+      "uuid": "e51252df-76d0-4f85-8a2d-2a7f6049122f"
+    },
+    {
+      "path": "259934",
+      "environment": "LIVE",
+      "number": "+18046894966",
+      "uuid": "041ddf0d-7f02-4e0d-96a7-befc127f3daa"
+    }
+  ],
+  "version": 2
+}
+[DEBUG] Found UUID for +18046894966: 041ddf0d-7f02-4e0d-96a7-befc127f3daa
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238059607
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received message from 0xG (59e21fdb-7fcc-49b8-9eae-a343f4a7a654) at 2025-11-15 20:21:39.156000: hi
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238099156
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Message sent successfully to 59e21fdb-7fcc-49b8-9eae-a343f4a7a654
+Received message from 0xG (59e21fdb-7fcc-49b8-9eae-a343f4a7a654) at 2025-11-15 20:21:53.600000: wtf
+Message sent successfully to 59e21fdb-7fcc-49b8-9eae-a343f4a7a654
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238113600
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +14436585111 UUID: bd827158-c5fb-4104-9267-a16a8d6cf0b8
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +14056436903 UUID: 4cf7879b-90b5-4dd4-8c45-1ac2ded566df
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +14406167807 UUID: a68dd2d0-cf3f-43be-a5f8-77401d26620c
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +18135822472 UUID: e51252df-76d0-4f85-8a2d-2a7f6049122f
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +15745661704 UUID: d6126711-1a3f-4c04-a843-1a7b6e59fbbb
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +17753178238 UUID: 45b35f09-0027-463d-b604-1f577f9ee66a
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +18046894966 UUID: 041ddf0d-7f02-4e0d-96a7-befc127f3daa
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '+19785927807', 'number': '+19785927807', 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +12186633092 UUID: 674b3e6a-41b8-441e-828f-d8be895d0d96
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238130523
+Received by: 8/12 bots
+
+⚠ MENTIONED bots that MISSED the message:
+  ✗ [+19785927807] (sonnet-4-5) - WILL RECONNECT AND RE-TRIGGER
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+17602847933] (3-opus)
+
+Reconnecting 1 mentioned bot(s)...
+  → Reconnecting [+19785927807] (sonnet-4-5) and will re-trigger response
+[+19785927807] WebSocket connection closed: None - None
+============================================================
+
+[+19785927807] Attempting to reconnect...
+[+19785927807] Reconnecting WebSocket (attempt 1/3)...
+[+19785927807] WebSocket run_forever exited, will reconnect...
+[+19785927807] WebSocket connection opened
+[+19785927807] Re-processing 1 pending message(s)...
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:10.523000: ￼ hi
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +19785927807 UUID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92
+[IDENTITY] ✓ Bot mentioned by UUID!
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:21.348000: Hi there! How can I help you today?
+DEBUG - Mentions: []
+Message sent successfully to group group.OXRrK1JKcWRiY0...
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:21.348000: Hi there! How can I help you today?
+DEBUG - Mentions: []
+[+19785927807] ✓ Successfully re-processed pending message
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:21.348000: Hi there! How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:21.348000: Hi there! How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:21.348000: Hi there! How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:21.348000: Hi there! How can I help you today?
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: +19785927807:1763238141348
+Received by: 2/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92:1763238141348
+Received by: 4/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14436585111] (opus-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:26.979000: Hello! 👋 How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:26.979000: Hello! 👋 How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:26.979000: Hello! 👋 How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:26.979000: Hello! 👋 How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:26.979000: Hello! 👋 How can I help you today?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:22:26.979000: Hello! 👋 How can I help you today?
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: +19785927807:1763238146979
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92:1763238146979
+Received by: 5/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12186633092] (haiku-4-5)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheeseReceived GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+DEBUG - Mentions: [{'name': '+19785927807', 'number': '+19785927807', 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +12186633092 UUID: 674b3e6a-41b8-441e-828f-d8be895d0d96
+DEBUG - Mentions: [{'name': '+19785927807', 'number': '+19785927807', 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +18135822472 UUID: e51252df-76d0-4f85-8a2d-2a7f6049122f
+
+[IDENTITY] Bot +17602847933 UUID: 08326a90-8f17-43e4-9477-337a18789a15
+[IDENTITY] Bot +14406167807 UUID: a68dd2d0-cf3f-43be-a5f8-77401d26620c
+
+[IDENTITY] Bot +12052028562 UUID: 6d3f982e-16e8-43b6-a56f-f045c6170b6b
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +18046894966 UUID: 041ddf0d-7f02-4e0d-96a7-befc127f3daa
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +14436585111 UUID: bd827158-c5fb-4104-9267-a16a8d6cf0b8
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238180725
+Received by: 7/12 bots
+
+⚠ MENTIONED bots that MISSED the message:
+  ✗ [+19785927807] (sonnet-4-5) - WILL RECONNECT AND RE-TRIGGER
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+15745661704] (sonnet-4)
+  • [+17753178238] (3-7-sonnet)
+
+Reconnecting 1 mentioned bot(s)...
+  → Reconnecting [+19785927807] (sonnet-4-5) and will re-trigger response
+============================================================
+
+[+19785927807] WebSocket connection closed: None - None
+[+19785927807] Attempting to reconnect...
+[+19785927807] Reconnecting WebSocket (attempt 1/3)...
+[+19785927807] WebSocket run_forever exited, will reconnect...
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:12.119000: Cheese is great! 🧀 Do you have a favorite type? I hear there are hundreds of varieties out there - from sharp cheddars to creamy bries to funky blue cheeses.
+DEBUG - Mentions: []
+
+DEBUG - Mentions: []
+[+19785927807] WebSocket connection opened
+[+19785927807] Re-processing 1 pending message(s)...
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:00.725000: ￼ i like cheese
+DEBUG - Mentions: [{'name': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'number': None, 'uuid': '36c527c5-1b31-4e7f-bd74-82c5f957cf92', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +19785927807 UUID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92
+[IDENTITY] ✓ Bot mentioned by UUID!
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: +19785927807:1763238192119
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92:1763238192119
+Received by: 7/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12186633092] (haiku-4-5)
+  • [+17602847933] (3-opus)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:16.894000: Cheese is great! Do you have a favorite type? There's such a wide variety – from sharp cheddars to creamy bries, tangy blues, or fresh mozzarella. Are you more into mild cheeses or the stronger, aged ones?
+DEBUG - Mentions: []
+Message sent successfully to group group.OXRrK1JKcWRiY0...
+[+19785927807] ✓ Successfully re-processed pending message
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:16.894000: Cheese is great! Do you have a favorite type? There's such a wide variety – from sharp cheddars to creamy bries, tangy blues, or fresh mozzarella. Are you more into mild cheeses or the stronger, aged ones?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:16.894000: Cheese is great! Do you have a favorite type? There's such a wide variety – from sharp cheddars to creamy bries, tangy blues, or fresh mozzarella. Are you more into mild cheeses or the stronger, aged ones?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:16.894000: Cheese is great! Do you have a favorite type? There's such a wide variety – from sharp cheddars to creamy bries, tangy blues, or fresh mozzarella. Are you more into mild cheeses or the stronger, aged ones?
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: +19785927807:1763238196894
+Received by: 2/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92:1763238196894
+Received by: 2/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:34.848000: blue cheese
+DEBUG - Mentions: []
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:34.848000: blue cheese
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238214848
+Received by: 2/12 bots
+
+⚠ MENTIONED bots that MISSED the message:
+  ✗ [+19785927807] (sonnet-4-5) - WILL RECONNECT AND RE-TRIGGER
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+
+Reconnecting 1 mentioned bot(s)...
+  → Reconnecting [+19785927807] (sonnet-4-5) and will re-trigger response
+============================================================
+[+19785927807] WebSocket connection closed: None - None
+
+[+19785927807] Attempting to reconnect...
+[+19785927807] Reconnecting WebSocket (attempt 1/3)...
+[+19785927807] WebSocket run_forever exited, will reconnect...
+[+19785927807] WebSocket connection opened
+[+19785927807] Re-processing 1 pending message(s)...
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:34.848000: blue cheese
+DEBUG - Mentions: []
+[IDENTITY] ✓ Bot was quoted/replied to!
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []
+Message sent successfully to group group.OXRrK1JKcWRiY0...
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+[+19785927807] ✓ Successfully re-processed pending messageDEBUG - Mentions: []
+
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.870000: Excellent choice! Blue cheese has such a distinctive flavor profile - that sharp, tangy, slightly funky taste from the Penicillium mold cultures. Classic varieties like Roquefort, Gorgonzola, and Stilton each have their own character. Do you prefer it crumbled on salads, melted into sauces, or just eaten on its own?
+DEBUG - Mentions: []
+
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.898000: Blue cheese is a bold choice! The distinctive veining and that sharp, tangy flavor definitely aren't for everyone, but those who love it really love it. Do you enjoy it in any particular way – crumbled on salads, in dressings, with fruit, or just on its own with some crackers?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.898000: Blue cheese is a bold choice! The distinctive veining and that sharp, tangy flavor definitely aren't for everyone, but those who love it really love it. Do you enjoy it in any particular way – crumbled on salads, in dressings, with fruit, or just on its own with some crackers?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.898000: Blue cheese is a bold choice! The distinctive veining and that sharp, tangy flavor definitely aren't for everyone, but those who love it really love it. Do you enjoy it in any particular way – crumbled on salads, in dressings, with fruit, or just on its own with some crackers?
+DEBUG - Mentions: []
+Received GROUP message from sonnet-4-5 (36c527c5...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:46.898000: Blue cheese is a bold choice! The distinctive veining and that sharp, tangy flavor definitely aren't for everyone, but those who love it really love it. Do you enjoy it in any particular way – crumbled on salads, in dressings, with fruit, or just on its own with some crackers?
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: +19785927807:1763238226870
+Received by: 2/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92:1763238226870
+Received by: 6/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: +19785927807:1763238226898
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92:1763238226898
+Received by: 3/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+18046894966] (3-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:58.035000: ￼ hello
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +17602847933 UUID: 08326a90-8f17-43e4-9477-337a18789a15
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:58.035000: ￼ hello
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +18135822472 UUID: e51252df-76d0-4f85-8a2d-2a7f6049122f
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:58.035000: ￼ hello
+DEBUG - Mentions: [{'name': '+17753178238', 'number': '+17753178238', 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +17753178238 UUID: 45b35f09-0027-463d-b604-1f577f9ee66a
+[IDENTITY] ✓ Bot mentioned by phone number!
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:58.035000: ￼ hello
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +12186633092 UUID: 674b3e6a-41b8-441e-828f-d8be895d0d96
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:58.035000: ￼ hello
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +14056436903 UUID: 4cf7879b-90b5-4dd4-8c45-1ac2ded566df
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:58.035000: ￼ hello
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +15745661704 UUID: d6126711-1a3f-4c04-a843-1a7b6e59fbbb
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.246000: Hello! Is there something specific I can help you with today?
+DEBUG - Mentions: []
+Message sent successfully to group group.OXRrK1JKcWRiY0...
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.246000: Hello! Is there something specific I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.284000: Hello! Good to see you again. Is there something I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.246000: Hello! Is there something specific I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.246000: Hello! Is there something specific I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.246000: Hello! Is there something specific I can help you with today?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:23:59.246000: Hello! Is there something specific I can help you with today?
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238238035
+Received by: 6/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+18046894966] (3-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 45b35f09-0027-463d-b604-1f577f9ee66a:1763238239284
+Received by: 8/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052240154] (3-5-haiku)
+  • [+14406167807] (3-haiku)
+  • [+17753178238] (3-7-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 45b35f09-0027-463d-b604-1f577f9ee66a:1763238239246
+Received by: 6/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052240154] (3-5-haiku)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+15745661704] (sonnet-4)
+  • [+17753178238] (3-7-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:24:51.227000: ￼ hi
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +12052240154 UUID: 7f6a9680-c15a-4d6f-bb01-234b371dc237
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:24:51.227000: ￼ hi
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +19785927807 UUID: 36c527c5-1b31-4e7f-bd74-82c5f957cf92
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:24:51.227000: ￼ hi
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +18046894966 UUID: 041ddf0d-7f02-4e0d-96a7-befc127f3daa
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238291227
+Received by: 3/12 bots
+
+⚠ MENTIONED bots that MISSED the message:
+  ✗ [+17753178238] (3-7-sonnet) - WILL RECONNECT AND RE-TRIGGER
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+18135822472] (3-6-sonnet)
+
+Reconnecting 1 mentioned bot(s)...
+  → Reconnecting [+17753178238] (3-7-sonnet) and will re-trigger response
+============================================================
+
+[+17753178238] WebSocket connection closed: None - None
+[+17753178238] Attempting to reconnect...
+[+17753178238] Reconnecting WebSocket (attempt 1/3)...
+[+17753178238] WebSocket run_forever exited, will reconnect...
+[+17753178238] WebSocket connection opened
+[+17753178238] Re-processing 1 pending message(s)...
+Received GROUP message from 0xG (59e21fdb...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:24:51.227000: ￼ hi
+DEBUG - Mentions: [{'name': '45b35f09-0027-463d-b604-1f577f9ee66a', 'number': None, 'uuid': '45b35f09-0027-463d-b604-1f577f9ee66a', 'start': 0, 'length': 1}]
+[IDENTITY] Bot +17753178238 UUID: 45b35f09-0027-463d-b604-1f577f9ee66a
+[IDENTITY] ✓ Bot mentioned by UUID!
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.375000: Hi there! How are you doing today? Is there something I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.375000: Hi there! How are you doing today? Is there something I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.375000: Hi there! How are you doing today? Is there something I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.375000: Hi there! How are you doing today? Is there something I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.375000: Hi there! How are you doing today? Is there something I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.375000: Hi there! How are you doing today? Is there something I can help you with?
+DEBUG - Mentions: []
+Message sent successfully to group group.OXRrK1JKcWRiY0...
+[+17753178238] ✓ Successfully re-processed pending message
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.547000: Hi there! How's your day going? Is there anything specific you'd like to chat about or any questions I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.547000: Hi there! How's your day going? Is there anything specific you'd like to chat about or any questions I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.547000: Hi there! How's your day going? Is there anything specific you'd like to chat about or any questions I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.547000: Hi there! How's your day going? Is there anything specific you'd like to chat about or any questions I can help you with?
+DEBUG - Mentions: []
+Received GROUP message from 3-7-sonnet (45b35f09...) in group.OXRrK1JKcWRiY015Q3Z0VWdm... at 2025-11-15 20:25:00.547000: Hi there! How's your day going? Is there anything specific you'd like to chat about or any questions I can help you with?
+DEBUG - Mentions: []
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 45b35f09-0027-463d-b604-1f577f9ee66a:1763238300375
+Received by: 6/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+15745661704] (sonnet-4)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 45b35f09-0027-463d-b604-1f577f9ee66a:1763238300547
+Received by: 5/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+14406167807] (3-haiku)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+19785927807] (sonnet-4-5)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received message from 0xG (59e21fdb-7fcc-49b8-9eae-a343f4a7a654) at 2025-11-15 20:25:53.303000: hey
+Message sent successfully to 59e21fdb-7fcc-49b8-9eae-a343f4a7a654
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238353303
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Received message from 0xG (59e21fdb-7fcc-49b8-9eae-a343f4a7a654) at 2025-11-15 20:26:11.522000: hey
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238371522
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
+Message sent successfully to 59e21fdb-7fcc-49b8-9eae-a343f4a7a654
+Received message from 0xG (59e21fdb-7fcc-49b8-9eae-a343f4a7a654) at 2025-11-15 20:28:18.169000: hi
+Message sent successfully to 59e21fdb-7fcc-49b8-9eae-a343f4a7a654
+
+============================================================
+MESSAGE CONSISTENCY CHECK
+============================================================
+Message ID: 59e21fdb-7fcc-49b8-9eae-a343f4a7a654:1763238498169
+Received by: 1/12 bots
+
+Other bots that missed (not mentioned, ignoring):
+  • [+12052028562] (3-5-sonnet)
+  • [+12052240154] (3-5-haiku)
+  • [+12186633092] (haiku-4-5)
+  • [+14056436903] (opus-4-1)
+  • [+14406167807] (3-haiku)
+  • [+14436585111] (opus-4)
+  • [+15745661704] (sonnet-4)
+  • [+17602847933] (3-opus)
+  • [+17753178238] (3-7-sonnet)
+  • [+18046894966] (3-sonnet)
+  • [+18135822472] (3-6-sonnet)
+
+ℹ No mentioned bots missed the message, no reconnection needed
+============================================================
+
