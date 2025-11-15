@@ -7,9 +7,10 @@ import config
 
 
 class User:
-    def __init__(self, phone_number, default_system_instruction, default_model, group_id=None):
+    def __init__(self, phone_number, default_system_instruction, default_model, group_id=None, bot_phone=None):
         self.phone_number = phone_number
         self.group_id = group_id  # None for individual chats, group ID for group chats
+        self.bot_phone = bot_phone or config.SIGNAL_PHONE_NUMBER  # Bot's phone number
         self.current_system_instruction = default_system_instruction
         self.current_model = default_model
         self.trusted = phone_number in config.TRUSTED_PHONE_NUMBERS
@@ -80,7 +81,7 @@ class User:
             recipient_display = self.phone_number
 
         payload = {
-            "number": config.SIGNAL_PHONE_NUMBER,
+            "number": self.bot_phone,  # Use the bot's phone number
             "recipients": recipients,
         }
         if isinstance(content, str):

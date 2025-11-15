@@ -35,7 +35,28 @@ There is a successor project using a signal bot as an MCP (Model Context Protoco
    uv sync
    ```
 
-3. Configure environment variables:
+3. Configure the bot:
+
+   **Step 1: Create config.json**
+   ```bash
+   # Copy the example configuration file
+   cp config.example.json config.json
+
+   # Edit config.json with your bot settings
+   nano config.json  # or use your preferred editor
+   ```
+
+   Configuration in `config.json`:
+   - `bots` - Array of bot instances (each with name, model, prompt)
+   - `max_history_messages` - Rolling window size for conversation history
+   - `group_privacy_mode` - Either "opt-in" (privacy-first) or "opt-out" (convenience-first)
+   - `trusted_phone_numbers` - Array of phone numbers allowed to use image generation
+   - `default_model` - Default AI model if not specified per-bot
+   - `default_system_instruction` - Default personality if not specified per-bot
+   - `lora_path_to_url` - (Optional) LoRA model mappings for image generation
+   - `prompt_replace_dict` - (Optional) Text replacements for image prompts
+
+   **Step 2: Create .env with secrets**
    ```bash
    # Copy the example environment file
    cp .env.example .env
@@ -44,14 +65,13 @@ There is a successor project using a signal bot as an MCP (Model Context Protoco
    nano .env  # or use your preferred editor
    ```
 
-   Required variables in `.env`:
+   Required in `.env`:
+   - `BOT_PHONE_NUMBERS` - Comma-separated list of Signal phone numbers (one per bot in config.json)
    - `GOOGLE_AI_STUDIO_API` - Your Google AI Studio API key (for Gemini models)
    - `ANTHROPIC_API_KEY` - Your Anthropic API key (for Claude models)
-   - `SIGNAL_PHONE_NUMBER` - Your Signal bot phone number
-   - `TRUSTED_PHONE_NUMBERS` - Comma-separated list of trusted phone numbers
    - `FAL_KEY` - (Optional) Your Fal.ai API key for image generation
-   - `LORA_PATH_TO_URL` - (Optional) JSON mapping of LoRA trigger words to URLs
-   - `PROMPT_REPLACE_DICT` - (Optional) JSON dictionary for prompt replacements
+
+   **Note:** Phone numbers in `BOT_PHONE_NUMBERS` correspond to bots in `config.json` by index (0, 1, 2, etc.)
 
 4. Run the Signal AI bot:
 
@@ -111,6 +131,71 @@ The bot supports two privacy modes for group chats:
 - Best for casual groups where everyone is comfortable with the bot learning context
 
 You can switch modes anytime with `!privacy opt-in` or `!privacy opt-out`. The setting is per-chat (each group and DM has its own privacy mode).
+
+## Multiple Bot Instances
+
+You can run multiple bot instances simultaneously, each with their own phone number and default settings. This allows you to create different bot personalities in Signal.
+
+**Configuration is split between `config.json` (names, models, prompts) and `.env` (phone numbers):**
+
+### Single Bot Example
+
+**config.json:**
+```json
+{
+  "bots": [
+    {
+      "name": "My Bot",
+      "model": "(6) claude-haiku-4-5-20251001",
+      "prompt": "(1) Standard"
+    }
+  ]
+}
+```
+
+**.env:**
+```bash
+BOT_PHONE_NUMBERS="+1234567890"
+```
+
+### Multiple Bots Example
+
+**config.json:**
+```json
+{
+  "bots": [
+    {
+      "name": "Haiku Bot",
+      "model": "(6) claude-haiku-4-5-20251001",
+      "prompt": "(1) Standard"
+    },
+    {
+      "name": "Sonnet Bot",
+      "model": "(10) claude-sonnet-4-5-20250929",
+      "prompt": "(2) Smileys"
+    },
+    {
+      "name": "Philosopher",
+      "model": "(10) claude-sonnet-4-5-20250929",
+      "prompt": "(6) Wittgenstein"
+    }
+  ]
+}
+```
+
+**.env:**
+```bash
+BOT_PHONE_NUMBERS="+1234567890,+0987654321,+5555555555"
+```
+
+**Important:** Phone numbers in `BOT_PHONE_NUMBERS` must match the order of bots in `config.json` (first phone → first bot, second phone → second bot, etc.)
+
+Each bot instance can have:
+- `name`: Bot display name (required)
+- `model`: Default AI model (optional - uses `default_model` from config if not specified)
+- `prompt`: Default system prompt key (optional - uses `default_system_instruction` from config if not specified)
+
+The bot will automatically create WebSocket connections for all configured instances. Each bot maintains separate conversation histories and can have different default models and personalities.
 
 ## Configuration
 

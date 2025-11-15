@@ -15,6 +15,40 @@ genai.configure(api_key=os.environ["GOOGLE_AI_STUDIO_API"])
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 users = {}
+bot_uuid_cache = {}  # Cache for bot phone -> UUID mapping
+group_histories = {}  # Shared conversation history for group chats: {group_id: [messages]}
+
+def get_bot_uuid(bot_phone):
+    """Get the UUID for a bot's phone number by querying Signal API"""
+    if bot_phone in bot_uuid_cache:
+        return bot_uuid_cache[bot_phone]
+
+    # Try to get UUID from accounts endpoint
+    try:
+        url = f"{HTTP_BASE_URL}/v1/accounts"
+        response = requests.get(url)
+        response.raise_for_status()
+        accounts = response.json()
+
+        # The accounts endpoint only returns phone numbers, not UUIDs
+        # We need to check the local data directory for UUIDs
+        import json
+        from pathlib import Path
+
+        accounts_file = Path.home() / ".local/share/signal-api/data/accounts.json"
+        if accounts_file.exists():
+            with open(accounts_file, 'r') as f:
+                data = json.load(f)
+                for account in data.get("accounts", []):
+                    if account.get("number") == bot_phone:
+                        uuid = account.get("uuid")
+                        if uuid:
+                            bot_uuid_cache[bot_phone] = uuid
+                            return uuid
+    except Exception as e:
+        print(f"Warning: Could not fetch UUID for {bot_phone}: {e}")
+
+    return None
 
 # Build formatted lists for help message
 models_list = '\n  '.join(VALID_MODELS)
@@ -68,9 +102,9 @@ def download_attachment(attachment_id: str):
         return None
 
 
-def get_group_id_from_internal(internal_id: str):
+def get_group_id_from_internal(internal_id: str, bot_phone: str):
     """Convert internal group ID to the proper Signal API group ID"""
-    url = f"{HTTP_BASE_URL}/v1/groups/{SIGNAL_PHONE_NUMBER}"
+    url = f"{HTTP_BASE_URL}/v1/groups/{bot_phone}"
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -89,12 +123,25 @@ def get_group_id_from_internal(internal_id: str):
         return f"group.{internal_id}" if not internal_id.startswith("group.") else internal_id
 
 
-def get_or_create_user(sender, group_id=None):
-    # Create unique key: use group_id if it's a group chat, otherwise use sender phone number
-    user_key = group_id if group_id else sender
+def get_or_create_user(sender, group_id=None, bot_phone=None):
+    # Create unique key: always include bot_phone to keep bot contexts separate
+    # Format: "bot_phone:sender" or "bot_phone:group_id"
+    base_key = group_id if group_id else sender
+    user_key = f"{bot_phone}:{base_key}"
 
     if user_key not in users:
-        users[user_key] = User(sender, DEFAULT_SYSTEM_INSTRUCTION, DEFAULT_MODEL, group_id=group_id)
+        # Get bot-specific defaults
+        bot_config = config.BOT_CONFIGS.get(bot_phone, {})
+        default_model = bot_config.get("model") or DEFAULT_MODEL
+        default_prompt_key = bot_config.get("prompt")
+
+        # Resolve prompt key to actual prompt
+        if default_prompt_key and default_prompt_key in SYSTEM_INSTRUCTIONS:
+            default_prompt = SYSTEM_INSTRUCTIONS[default_prompt_key]
+        else:
+            default_prompt = DEFAULT_SYSTEM_INSTRUCTION
+
+        users[user_key] = User(sender, default_prompt, default_model, group_id=group_id, bot_phone=bot_phone)
     return users[user_key]
 
 
@@ -263,17 +310,38 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 if content:
                     claude_message_content.append({"type": "text", "text": content})
 
-                # Add user message to history
-                user.claude_history.append({
-                    "role": "user",
-                    "content": claude_message_content
-                })
+                # For group chats, use shared history; for DMs, use user-specific history
+                if user.group_id:
+                    # Initialize shared group history if needed
+                    if user.group_id not in group_histories:
+                        group_histories[user.group_id] = []
 
-                # Trim history to keep only last N messages (rolling window)
-                if len(user.claude_history) > config.MAX_HISTORY_MESSAGES:
-                    # Keep the last MAX_HISTORY_MESSAGES messages
-                    user.claude_history = user.claude_history[-config.MAX_HISTORY_MESSAGES:]
-                    print(f"DEBUG - Trimmed history to last {config.MAX_HISTORY_MESSAGES} messages")
+                    # Add user message to shared group history
+                    group_histories[user.group_id].append({
+                        "role": "user",
+                        "content": claude_message_content
+                    })
+
+                    # Trim shared history
+                    if len(group_histories[user.group_id]) > config.MAX_HISTORY_MESSAGES:
+                        group_histories[user.group_id] = group_histories[user.group_id][-config.MAX_HISTORY_MESSAGES:]
+                        print(f"DEBUG - Trimmed shared group history to last {config.MAX_HISTORY_MESSAGES} messages")
+
+                    # Use shared history for this conversation
+                    conversation_history = group_histories[user.group_id]
+                else:
+                    # For DMs, use individual history
+                    user.claude_history.append({
+                        "role": "user",
+                        "content": claude_message_content
+                    })
+
+                    # Trim individual history
+                    if len(user.claude_history) > config.MAX_HISTORY_MESSAGES:
+                        user.claude_history = user.claude_history[-config.MAX_HISTORY_MESSAGES:]
+                        print(f"DEBUG - Trimmed history to last {config.MAX_HISTORY_MESSAGES} messages")
+
+                    conversation_history = user.claude_history
 
                 # If we shouldn't respond (not mentioned in group), just add to history and return
                 if not should_respond:
@@ -291,13 +359,13 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                 # Debug: Print what we're sending to Claude
                 print(f"DEBUG - System prompt: {system_prompt}")
-                print(f"DEBUG - Messages being sent: {user.claude_history}")
+                print(f"DEBUG - Messages being sent: {conversation_history}")
 
                 # Make API call with conversation history
                 api_params = {
                     "model": model_name,
                     "max_tokens": 4096,
-                    "messages": user.claude_history
+                    "messages": conversation_history
                 }
                 if system_prompt:
                     api_params["system"] = system_prompt
@@ -322,11 +390,19 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 else:
                     history_response = ai_response
 
-                # Add assistant response to history (with model prefix for group chats)
-                user.claude_history.append({
-                    "role": "assistant",
-                    "content": history_response
-                })
+                # Add assistant response to history
+                if user.group_id:
+                    # Add to shared group history
+                    group_histories[user.group_id].append({
+                        "role": "assistant",
+                        "content": history_response
+                    })
+                else:
+                    # Add to individual history
+                    user.claude_history.append({
+                        "role": "assistant",
+                        "content": history_response
+                    })
 
             else:
                 # Handle Gemini API (original code)
@@ -344,9 +420,13 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
         user.send_message("I received your message, but it seems to be empty.")
 
 
-def process_message(message: Dict):
+def process_message(message: Dict, bot_phone: str = None):
     if "envelope" not in message or "dataMessage" not in message["envelope"]:
         return
+
+    # Use bot_phone if provided, otherwise fall back to config
+    if bot_phone is None:
+        bot_phone = config.SIGNAL_PHONE_NUMBER
 
     sender = message["envelope"]["source"]
     sender_uuid = message["envelope"].get("sourceUuid", "")
@@ -362,7 +442,7 @@ def process_message(message: Dict):
     if group_info and "groupId" in group_info:
         # Convert internal group ID to proper Signal API group ID
         internal_group_id = group_info["groupId"]
-        group_id = get_group_id_from_internal(internal_group_id)
+        group_id = get_group_id_from_internal(internal_group_id, bot_phone)
         display_sender = sender_name if sender_name else sender
         print(f"Received GROUP message from {display_sender} ({sender_uuid[:8]}...) in {group_id[:30]}... at {timestamp}: {content}")
         print(f"DEBUG - Mentions: {mentions}")
@@ -370,12 +450,27 @@ def process_message(message: Dict):
         # In group chats, only respond if the bot is mentioned
         bot_mentioned = False
         if mentions:
+            # Get this bot's UUID for comparison
+            bot_uuid = get_bot_uuid(bot_phone)
+            print(f"DEBUG - Bot UUID for {bot_phone}: {bot_uuid}")
+
             # Check if any mention is for the bot (by UUID or phone number)
             for mention in mentions:
                 # Mentions can have 'uuid' or 'number' field
-                if mention.get("uuid") or mention.get("number") == SIGNAL_PHONE_NUMBER:
+                mention_uuid = mention.get("uuid")
+                mention_number = mention.get("number")
+                print(f"DEBUG - Checking mention: uuid={mention_uuid}, number={mention_number}")
+
+                # Check if the mention matches this bot's phone number
+                if mention_number == bot_phone:
                     bot_mentioned = True
-                    print(f"DEBUG - Bot was mentioned!")
+                    print(f"DEBUG - Bot was mentioned by phone number!")
+                    break
+
+                # Check if the mention matches this bot's UUID
+                if bot_uuid and mention_uuid == bot_uuid:
+                    bot_mentioned = True
+                    print(f"DEBUG - Bot was mentioned by UUID!")
                     break
 
         # Store these for later privacy check (after user creation)
@@ -408,7 +503,7 @@ def process_message(message: Dict):
         args = ""
 
     # Create or get user object
-    user = get_or_create_user(sender, group_id=group_id)
+    user = get_or_create_user(sender, group_id=group_id, bot_phone=bot_phone)
 
     # Apply privacy filtering for group chats
     if is_group_chat:

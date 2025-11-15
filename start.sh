@@ -8,21 +8,21 @@ set -e  # Exit on error
 echo "🚀 Starting Signal AI Chat Bot..."
 echo ""
 
-# Check if .env file exists
-if [ ! -f .env ]; then
-    echo "❌ Error: .env file not found!"
-    echo "Please copy .env.example to .env and configure it:"
-    echo "  cp .env.example .env"
-    echo "  nano .env"
+# Check if config.json file exists
+if [ ! -f config.json ]; then
+    echo "❌ Error: config.json file not found!"
+    echo "Please copy config.example.json to config.json and configure it:"
+    echo "  cp config.example.json config.json"
+    echo "  nano config.json"
     exit 1
 fi
 
-# Load environment variables
-source .env
-
-# Check if required environment variables are set
-if [ -z "$SIGNAL_PHONE_NUMBER" ]; then
-    echo "❌ Error: SIGNAL_PHONE_NUMBER not set in .env file"
+# Check if .env file exists
+if [ ! -f .env ]; then
+    echo "❌ Error: .env file not found!"
+    echo "Please copy .env.example to .env and configure it with your API keys:"
+    echo "  cp .env.example .env"
+    echo "  nano .env"
     exit 1
 fi
 
@@ -85,7 +85,7 @@ fi
 
 echo ""
 echo "🤖 Starting Signal AI Bot..."
-echo "   Bot phone number: $SIGNAL_PHONE_NUMBER"
+echo "   Configuration loaded from config.json"
 echo "   Press Ctrl+C to stop the bot"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

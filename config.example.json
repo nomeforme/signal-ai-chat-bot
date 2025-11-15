@@ -1,0 +1,18 @@
+{
+  "bots": [
+    {
+      "name": "Bot Name",
+      "model": "(6) claude-haiku-4-5-20251001",
+      "prompt": "(1) Standard"
+    }
+  ],
+  "max_history_messages": 200,
+  "group_privacy_mode": "opt-in",
+  "trusted_phone_numbers": [],
+  "session_timeout": 30,
+  "default_model": "(6) claude-haiku-4-5-20251001",
+  "default_system_instruction": "(1) Standard",
+  "default_image_size": "(5) portrait_3_4",
+  "lora_path_to_url": {},
+  "prompt_replace_dict": {}
+}
