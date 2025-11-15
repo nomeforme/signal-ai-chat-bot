@@ -1,9 +1,20 @@
 {
   "bots": [
     {
-      "name": "Bot Name",
+      "name": "haiku-4-5",
       "model": "(6) claude-haiku-4-5-20251001",
-      "prompt": "(1) Standard"
+      "prompt": "(1) Standard",
+      "persist_history": false,
+      "tools": [],
+      "description": "Claude Haiku 4.5"
+    },
+    {
+      "name": "sonnet-4-5",
+      "model": "(10) claude-sonnet-4-5-20250929",
+      "prompt": "(1) Standard",
+      "persist_history": false,
+      "tools": [],
+      "description": "Claude Sonnet 4.5"
     }
   ],
   "max_history_messages": 200,
@@ -14,5 +25,6 @@
   "default_system_instruction": "(1) Standard",
   "default_image_size": "(5) portrait_3_4",
   "lora_path_to_url": {},
-  "prompt_replace_dict": {}
+  "prompt_replace_dict": {},
+  "random_reply_chance": 0
 }

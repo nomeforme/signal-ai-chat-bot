@@ -51,7 +51,6 @@ if curl -s http://localhost:8080/v1/about > /dev/null 2>&1; then
     echo "✅ signal-cli-rest-api is already running on port 8080"
 else
     echo "🔧 Starting signal-cli-rest-api..."
-    echo "   Using podman to start the container..."
 
     # Detect Docker or Podman
     if command -v podman &> /dev/null; then
@@ -63,12 +62,20 @@ else
         exit 1
     fi
 
-    # Start signal-cli-rest-api in the background
-    $CONTAINER_CMD run -d --name signal-api \
-        -p 8080:8080 \
-        -v $HOME/.local/share/signal-api:/home/.local/share/signal-cli \
-        -e 'MODE=json-rpc' \
-        bbernhard/signal-cli-rest-api
+    echo "   Using $CONTAINER_CMD to start the container..."
+
+    # Check if container exists but is stopped
+    if $CONTAINER_CMD ps -a --format '{{.Names}}' | grep -q '^signal-api$'; then
+        echo "   Container exists, starting it..."
+        $CONTAINER_CMD start signal-api
+    else
+        # Start signal-cli-rest-api in the background
+        $CONTAINER_CMD run -d --name signal-api \
+            -p 8080:8080 \
+            -v $HOME/.local/share/signal-api:/home/.local/share/signal-cli \
+            -e 'MODE=json-rpc' \
+            bbernhard/signal-cli-rest-api
+    fi
 
     echo "⏳ Waiting for signal-cli-rest-api to be ready..."
     sleep 5

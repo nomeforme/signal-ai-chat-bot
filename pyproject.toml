@@ -3,7 +3,7 @@ name = "signal-ai-chat-bot"
 version = "0.1.0"
 description = "AI-powered chatbot that integrates with Signal messenger, supporting Gemini and Claude models"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "Your Name", email = "your.email@example.com"}
@@ -19,6 +19,7 @@ dependencies = [
     "websocket-client>=1.6.0",
     "requests>=2.31.0",
     "python-dotenv>=1.0.0",
+    "claude-agent-sdk>=0.1.6",
 ]
 
 [project.urls]

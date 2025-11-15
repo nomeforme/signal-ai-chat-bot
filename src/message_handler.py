@@ -10,9 +10,12 @@ import anthropic
 import boto3
 import json as json_module
 import fal_client
+import asyncio
 import config
 from config import *
 from user import User
+from agent import create_agent_from_config
+from agent_executor import execute_agent_turn
 
 genai.configure(api_key=os.environ["GOOGLE_AI_STUDIO_API"])
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
@@ -432,12 +435,12 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                 # Signal text formatting instructions (appended to all prompts)
                 signal_formatting = """
-Text Formatting: When formatting text, use Signal's syntax:
-- *italic* for italic text (not _italic_)
-- **bold** for bold text
-- `code` for monospace
-- ~strikethrough~ for strikethrough
-"""
+                    Text Formatting: When formatting text, use Signal's syntax:
+                    - *italic* for italic text (not _italic_)
+                    - **bold** for bold text
+                    - `code` for monospace
+                    - ~strikethrough~ for strikethrough
+                """
 
                 # Build system prompt - add group chat context if needed
                 if user.group_id:
@@ -498,6 +501,10 @@ Text Formatting: When formatting text, use Signal's syntax:
 
                 print(f"DEBUG - System prompt: {system_prompt}")
                 print(f"DEBUG - Messages being sent: {sanitize_for_logging(conversation_history)}")
+
+                # Check if bot has tools enabled (for later history update logic)
+                bot_config = config.BOT_CONFIGS.get(user.bot_phone, {})
+                tools_enabled = bot_config.get("tools", [])
 
                 # Make API call with conversation history
                 if is_bedrock:
@@ -593,20 +600,44 @@ Text Formatting: When formatting text, use Signal's syntax:
 
                     ai_response = response_body['content'][0]['text']
                 else:
-                    # Use direct Anthropic API
-                    api_params = {
-                        "model": model_name,
-                        "max_tokens": 4096,
-                        "messages": conversation_history
-                    }
-                    if system_prompt:
-                        api_params["system"] = system_prompt
+                    # Use direct Anthropic API with agent system
+                    if tools_enabled:
+                        # Agent has tools - use agent executor
+                        print(f"DEBUG - Using agent executor with tools: {tools_enabled}")
 
-                    response = anthropic_client.messages.create(**api_params)
+                        # Create agent definition
+                        agent = create_agent_from_config(bot_config, system_prompt)
 
-                    print(f"DEBUG - Claude's raw response: {response.content[0].text}")
+                        # Execute agent turn with tool support
+                        # Note: execute_agent_turn is async, so we need to run it
+                        ai_response, updated_messages = asyncio.run(
+                            execute_agent_turn(
+                                client=anthropic_client,
+                                agent=agent,
+                                messages=conversation_history
+                            )
+                        )
 
-                    ai_response = response.content[0].text
+                        # Update conversation history with tool calls
+                        # The executor returns updated messages including tool use
+                        conversation_history = updated_messages
+
+                        print(f"DEBUG - Agent response: {ai_response}")
+                    else:
+                        # No tools - use standard API call
+                        api_params = {
+                            "model": model_name,
+                            "max_tokens": 4096,
+                            "messages": conversation_history
+                        }
+                        if system_prompt:
+                            api_params["system"] = system_prompt
+
+                        response = anthropic_client.messages.create(**api_params)
+
+                        print(f"DEBUG - Claude's raw response: {response.content[0].text}")
+
+                        ai_response = response.content[0].text
 
                 # Strip any [prefix]: that Claude might have added despite instructions
                 import re
@@ -623,6 +654,8 @@ Text Formatting: When formatting text, use Signal's syntax:
                     history_response = ai_response
 
                 # Add assistant response to history
+                # Note: Even if agent executor was used, we only store the final text response
+                # (not the intermediate tool calls) to keep history simple and compatible
                 if user.group_id:
                     # Add to shared group history
                     group_histories[user.group_id].append({
@@ -644,7 +677,9 @@ Text Formatting: When formatting text, use Signal's syntax:
 
         except Exception as e:
             print(f"Error generating AI response: {e}")
-            ai_response = "Sorry, I couldn't generate a response at this time."
+            import traceback
+            traceback.print_exc()
+            ai_response = f"Sorry, I encountered an error: {str(e)}"
 
         # Detect mentions in the response (for group chats only)
         if user.group_id:

@@ -7,11 +7,12 @@ from message_handler import process_message
 
 
 # Global state for tracking WebSocket health
-websocket_state = {}  # {bot_phone: {"ws": ws, "thread": thread, "last_message": timestamp, "connected": bool}}
+websocket_state = {}  # {bot_phone: {"ws": ws, "thread": thread, "last_message": timestamp, "connected": bool, "retry_count": int}}
 reconnect_lock = threading.Lock()
 last_user_message = {}  # Track the last user message: {"message_id": timestamp, "received_by": set(), "data": {}, "mentioned_bots": set()}
 message_check_lock = threading.Lock()
 pending_messages = {}  # Messages to re-process after reconnection: {bot_phone: [message_data]}
+MAX_RECONNECT_RETRIES = 3  # Maximum reconnection attempts before giving up
 
 
 def create_message_handler(bot_phone):
@@ -124,11 +125,12 @@ def create_close_handler(bot_phone, bot_name):
 def create_open_handler(bot_phone):
     def on_open(ws):
         print(f"[{bot_phone}] WebSocket connection opened")
-        # Mark as connected and update last message time
+        # Mark as connected, update last message time, and reset retry count
         with reconnect_lock:
             if bot_phone in websocket_state:
                 websocket_state[bot_phone]["connected"] = True
                 websocket_state[bot_phone]["last_message"] = time.time()
+                websocket_state[bot_phone]["retry_count"] = 0  # Reset on successful connection
 
         # Process any pending messages for this bot
         if bot_phone in pending_messages and pending_messages[bot_phone]:
@@ -172,7 +174,8 @@ def run_websocket(bot_phone, bot_name):
                         "thread": threading.current_thread(),
                         "last_message": time.time(),
                         "connected": False,
-                        "bot_name": bot_name
+                        "bot_name": bot_name,
+                        "retry_count": 0
                     }
                 else:
                     websocket_state[bot_phone]["ws"] = ws
@@ -272,19 +275,76 @@ def check_message_consistency(message_id):
         print(f"✓ Message consistency OK: {message_id[:40]}... ({len(received_by)}/{len(all_bots)} bots)")
 
 
+def send_reconnect_failure_message(bot_phone, bot_name, message_data):
+    """Send a message indicating reconnection failure"""
+    import requests
+    from config import HTTP_BASE_URL
+
+    envelope = message_data.get("envelope", {})
+    group_id = envelope.get("dataMessage", {}).get("groupInfo", {}).get("groupId")
+
+    # Determine recipient
+    if group_id:
+        # Group message
+        recipients = [group_id]
+    else:
+        # DM - respond to sender
+        sender = envelope.get("sourceNumber") or envelope.get("source")
+        if not sender:
+            print(f"[{bot_phone}] Cannot send failure message - no sender found")
+            return
+        recipients = [sender]
+
+    error_message = f"[{bot_name}] Sorry, I couldn't reconnect to Signal after {MAX_RECONNECT_RETRIES} attempts. I'll try again next time you mention me."
+
+    try:
+        url = f"{HTTP_BASE_URL}/v2/send"
+        payload = {
+            "number": bot_phone,
+            "recipients": recipients,
+            "message": error_message,
+            "text_mode": "styled"
+        }
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        print(f"[{bot_phone}] Sent reconnection failure message")
+    except Exception as e:
+        print(f"[{bot_phone}] Failed to send reconnection failure message: {e}")
+
+
 def reconnect_websocket(bot_phone, bot_name):
     """Reconnect a WebSocket that has disconnected"""
     with reconnect_lock:
         if bot_phone not in websocket_state:
             print(f"[{bot_phone}] Cannot reconnect - not in websocket_state")
-            return
+            return False
 
         # Check if already connected
         if websocket_state[bot_phone]["connected"]:
             print(f"[{bot_phone}] Already connected, skipping reconnection")
-            return
+            return True
 
-        print(f"[{bot_phone}] Reconnecting WebSocket...")
+        # Check retry count
+        retry_count = websocket_state[bot_phone].get("retry_count", 0)
+        if retry_count >= MAX_RECONNECT_RETRIES:
+            print(f"[{bot_phone}] Max reconnection retries ({MAX_RECONNECT_RETRIES}) exceeded")
+
+            # Send error message to the group/user if we have pending messages
+            if bot_phone in pending_messages and pending_messages[bot_phone]:
+                # Get the last pending message to send error response
+                last_message = pending_messages[bot_phone][-1]
+                send_reconnect_failure_message(bot_phone, bot_name, last_message)
+
+                # Clear pending messages for this bot
+                pending_messages[bot_phone] = []
+
+            # Reset retry count for next attempt
+            websocket_state[bot_phone]["retry_count"] = 0
+            return False
+
+        # Increment retry count
+        websocket_state[bot_phone]["retry_count"] = retry_count + 1
+        print(f"[{bot_phone}] Reconnecting WebSocket (attempt {websocket_state[bot_phone]['retry_count']}/{MAX_RECONNECT_RETRIES})...")
 
         # Close old connection if it exists
         old_ws = websocket_state[bot_phone].get("ws")
@@ -294,6 +354,7 @@ def reconnect_websocket(bot_phone, bot_name):
             except:
                 pass
 
+        return True  # Allow reconnection attempt
         # The on_close handler will trigger run_websocket to create a new connection
 
 
