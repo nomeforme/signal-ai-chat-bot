@@ -15,7 +15,6 @@ dependencies = [
     "anthropic>=0.40.0",
     "boto3>=1.28.0",
     "fal-client>=0.4.0",
-    "rel>=0.4.9",
     "websocket-client>=1.6.0",
     "requests>=2.31.0",
     "python-dotenv>=1.0.0",

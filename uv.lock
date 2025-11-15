@@ -1256,14 +1256,6 @@ wheels = [
 ]
 
 [[package]]
-name = "rel"
-version = "0.4.9.22"
-source = { registry = "https://pypi.org/simple" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/da/a091725add66259f2a894da416c2c070adb68ba2eb624d9a89c3b3bae430/rel-0.4.9.22-py3-none-any.whl", hash = "sha256:50d741439244048f9242118ca7957c22bd1d8be9f5b39bc11904cccc4c3c8b11", size = 16471 },
-]
-
-[[package]]
 name = "requests"
 version = "2.32.5"
 source = { registry = "https://pypi.org/simple" }
@@ -1438,7 +1430,6 @@ dependencies = [
     { name = "google-generativeai" },
     { name = "pillow" },
     { name = "python-dotenv" },
-    { name = "rel" },
     { name = "requests" },
     { name = "watchdog" },
     { name = "websocket-client" },
@@ -1454,7 +1445,6 @@ requires-dist = [
     { name = "google-generativeai", specifier = ">=0.3.0" },
     { name = "pillow", specifier = ">=10.0.0" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "rel", specifier = ">=0.4.9" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "watchdog", specifier = ">=3.0.0" },
     { name = "websocket-client", specifier = ">=1.6.0" },
