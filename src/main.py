@@ -25,13 +25,10 @@ def create_message_handler(bot_phone):
                     websocket_state[bot_phone]["last_message"] = time.time()
 
             data = json.loads(message)
-            # Log message receipt at WebSocket level
             envelope = data.get("envelope", {})
             source = envelope.get("source") or envelope.get("sourceNumber") or "unknown"
             timestamp = envelope.get("timestamp", "unknown")
             data_message = envelope.get("dataMessage", {})
-            message_text = data_message.get("message", "")[:50]  # First 50 chars
-            print(f"DEBUG - [{bot_phone}] WebSocket received message from {source} at {timestamp}: {message_text}...")
 
             # Track user messages for consistency checking
             if data_message and timestamp != "unknown":
@@ -84,11 +81,7 @@ def create_message_handler(bot_phone):
                             # Schedule consistency check in a separate thread after 3 seconds
                             threading.Timer(3.0, check_message_consistency, args=[message_id]).start()
 
-            print(f"DEBUG - [{bot_phone}] About to call process_message()")
-
             process_message(data, bot_phone)
-
-            print(f"DEBUG - [{bot_phone}] process_message() completed successfully")
         except json.JSONDecodeError:
             print(f"[{bot_phone}] Failed to decode JSON: {message}")
         except Exception as e:

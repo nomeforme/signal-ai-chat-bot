@@ -13,6 +13,10 @@ import fal_client
 import asyncio
 import config
 from config import *
+from colorama import Fore, Style, init
+
+# Initialize colorama
+init(autoreset=True)
 from user import User
 from agent import create_agent_from_config
 from agent_executor import execute_agent_turn
@@ -40,24 +44,41 @@ def get_bot_uuid(bot_phone):
     if bot_phone in bot_uuid_cache:
         return bot_uuid_cache[bot_phone]
 
-    # Try to get UUID from Signal API identities endpoint
-    # The first identity is always the bot itself
+    # Try to get UUID from accounts endpoint
     try:
-        url = f"{HTTP_BASE_URL}/v1/identities/{bot_phone}"
+        url = f"{HTTP_BASE_URL}/v1/accounts"
         response = requests.get(url)
         response.raise_for_status()
-        identities = response.json()
+        accounts = response.json()
 
-        # The first identity should be the bot itself
-        if identities and len(identities) > 0:
-            bot_identity = identities[0]
-            uuid = bot_identity.get("uuid")
-            if uuid:
-                bot_uuid_cache[bot_phone] = uuid
-                print(f"DEBUG - Cached UUID for {bot_phone}: {uuid}")
-                return uuid
+        # The accounts endpoint only returns phone numbers, not UUIDs
+        # We need to check the local data directory for UUIDs
+        import json
+        from pathlib import Path
+
+        # Try multiple possible paths (container vs non-container)
+        possible_paths = [
+            Path("/home/.local/share/signal-api/data/accounts.json"),  # Docker volume mount
+            Path.home() / ".local/share/signal-api/data/accounts.json"  # Non-container
+        ]
+
+        accounts_file = None
+        for path in possible_paths:
+            if path.exists():
+                accounts_file = path
+                break
+
+        if accounts_file:
+            with open(accounts_file, 'r') as f:
+                data = json.load(f)
+                for account in data.get("accounts", []):
+                    if account.get("number") == bot_phone:
+                        uuid = account.get("uuid")
+                        if uuid:
+                            bot_uuid_cache[bot_phone] = uuid
+                            return uuid
     except Exception as e:
-        print(f"Warning: Could not fetch UUID for {bot_phone} from API: {e}")
+        print(f"Warning: Could not fetch UUID for {bot_phone}: {e}")
 
     return None
 
@@ -500,8 +521,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                         sanitized.append(msg_copy)
                     return sanitized
 
-                print(f"DEBUG - System prompt: {system_prompt}")
-                print(f"DEBUG - Messages being sent: {sanitize_for_logging(conversation_history)}")
 
                 # Make API call with conversation history
                 if is_bedrock:
@@ -589,9 +608,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     if tools_enabled:
                         agent = create_agent_from_config(bot_config, system_prompt)
                         bedrock_body["tools"] = agent.get_anthropic_tools()
-                        print(f"DEBUG - Bedrock tools enabled: {tools_enabled}")
-
-                    print(f"DEBUG - Calling Bedrock with model: {bedrock_model_id}")
 
                     # Handle tool use loop for Bedrock
                     max_tool_rounds = 5
@@ -607,7 +623,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                         )
 
                         response_body = json_module.loads(bedrock_response['body'].read())
-                        print(f"DEBUG - Bedrock raw response: {response_body}")
 
                         stop_reason = response_body.get('stop_reason')
 
@@ -619,8 +634,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                                     tool_name = block['name']
                                     tool_input = block['input']
                                     tool_id = block['id']
-
-                                    print(f"DEBUG - Bedrock requesting tool: {tool_name}")
 
                                     # Execute tool
                                     result = asyncio.run(agent.execute_tool(tool_name, tool_input))
@@ -661,8 +674,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     # Use direct Anthropic API with agent system
                     if tools_enabled:
                         # Agent has tools - use agent executor
-                        print(f"DEBUG - Using agent executor with tools: {tools_enabled}")
-
                         # Create agent definition
                         agent = create_agent_from_config(bot_config, system_prompt)
 
@@ -679,8 +690,6 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                         # Update conversation history with tool calls
                         # The executor returns updated messages including tool use
                         conversation_history = updated_messages
-
-                        print(f"DEBUG - Agent response: {ai_response}")
                     else:
                         # No tools - use standard API call
                         api_params = {
@@ -693,15 +702,11 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                         response = anthropic_client.messages.create(**api_params)
 
-                        print(f"DEBUG - Claude's raw response: {response.content[0].text}")
-
                         ai_response = response.content[0].text
 
                 # Strip any [prefix]: that Claude might have added despite instructions
                 import re
                 ai_response = re.sub(r'^\[.*?\]:\s*', '', ai_response).strip()
-
-                print(f"DEBUG - After stripping prefix: {ai_response}")
 
                 # For group chats, add model name prefix to history (helps track which model said what)
                 if user.group_id:
@@ -756,11 +761,9 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
 def process_message(message: Dict, bot_phone: str = None):
     if "envelope" not in message:
-        print(f"DEBUG - [{bot_phone}] Message missing envelope, skipping")
         return
     if "dataMessage" not in message["envelope"]:
         # Could be a receipt, typing indicator, or other non-data message
-        print(f"DEBUG - [{bot_phone}] Message has no dataMessage (likely receipt/typing indicator), skipping")
         return
 
     # Use bot_phone if provided, otherwise fall back to config
@@ -777,16 +780,12 @@ def process_message(message: Dict, bot_phone: str = None):
     mentions = message["envelope"]["dataMessage"].get("mentions", [])
     quote = message["envelope"]["dataMessage"].get("quote")  # Check if this is a reply/quote
 
-    # Log entry to process_message to track which bot is handling this
-    print(f"DEBUG - [{bot_phone}] process_message() starting for sender {sender} (number: {sender_number}) at {timestamp}")
-
     # Cache sender name for mention detection (if we have a name)
     # Prefer sourceNumber over source (which might be UUID)
     sender_phone = sender_number if sender_number else (sender if sender.startswith('+') else None)
 
     if sender_name and sender_phone:
         user_name_to_phone[sender_name] = sender_phone
-        print(f"DEBUG - Cached name '{sender_name}' -> phone: {sender_phone}")
 
     # Check if this is a group message
     group_info = message["envelope"]["dataMessage"].get("groupInfo")
@@ -808,36 +807,33 @@ def process_message(message: Dict, bot_phone: str = None):
             quote_author = quote.get("author")
             quote_author_uuid = quote.get("authorUuid")
 
-            print(f"DEBUG - Message is a reply to: author={quote_author}, uuid={quote_author_uuid}")
-
             # Check if the quoted message is from this bot
             if quote_author == bot_phone or (bot_uuid and quote_author_uuid == bot_uuid):
                 bot_mentioned = True
-                print(f"DEBUG - Bot was quoted/replied to!")
+                print(f"{Fore.GREEN}[IDENTITY] ✓ Bot was quoted/replied to!{Style.RESET_ALL}")
 
         # Check for @mentions
         if mentions and not bot_mentioned:
             # Get this bot's UUID for comparison
             bot_uuid = get_bot_uuid(bot_phone)
-            print(f"DEBUG - Bot UUID for {bot_phone}: {bot_uuid}")
+            print(f"{Fore.CYAN}[IDENTITY] Bot {bot_phone} UUID: {bot_uuid}{Style.RESET_ALL}")
 
             # Check if any mention is for the bot (by UUID or phone number)
             for mention in mentions:
                 # Mentions can have 'uuid' or 'number' field
                 mention_uuid = mention.get("uuid")
                 mention_number = mention.get("number")
-                print(f"DEBUG - Checking mention: uuid={mention_uuid}, number={mention_number}")
 
                 # Check if the mention matches this bot's phone number
                 if mention_number == bot_phone:
                     bot_mentioned = True
-                    print(f"DEBUG - Bot was mentioned by phone number!")
+                    print(f"{Fore.GREEN}[IDENTITY] ✓ Bot mentioned by phone number!{Style.RESET_ALL}")
                     break
 
                 # Check if the mention matches this bot's UUID
                 if bot_uuid and mention_uuid == bot_uuid:
                     bot_mentioned = True
-                    print(f"DEBUG - Bot was mentioned by UUID!")
+                    print(f"{Fore.GREEN}[IDENTITY] ✓ Bot mentioned by UUID!{Style.RESET_ALL}")
                     break
 
         # Store these for later privacy check (after user creation)
@@ -884,25 +880,21 @@ def process_message(message: Dict, bot_phone: str = None):
             should_respond = bot_mentioned
 
             if not store_in_history:
-                print(f"DEBUG - [OPT-IN MODE] Message not prefixed with '.' and not mentioned, ignoring")
                 return
 
             # If message starts with ".", remove the prefix for processing
             if content.startswith("."):
                 content = content[1:].lstrip()  # Remove "." and any following spaces
-                print(f"DEBUG - [OPT-IN MODE] Opt-in message (started with '.'), storing in history")
         else:
             # Opt-out mode: Store all messages UNLESS prefixed with "."
             if content.startswith("."):
                 # User explicitly opted out of this message
-                print(f"DEBUG - [OPT-OUT MODE] Message prefixed with '.', ignoring")
                 return
 
             # Store all other messages (commands, mentions, and regular messages)
             store_in_history = True
             # Only respond if bot is mentioned (this includes commands)
             should_respond = bot_mentioned
-            print(f"DEBUG - [OPT-OUT MODE] Storing message in history")
 
         # Random reply feature: Give bot a chance to respond even when not mentioned
         if not should_respond and config.RANDOM_REPLY_CHANCE > 0:

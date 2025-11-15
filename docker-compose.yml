@@ -33,6 +33,8 @@ services:
       # Mount config files
       - ./config.json:/app/config.json:ro
       - ./.env:/app/.env:ro
+      # Mount signal-cli data directory to access accounts.json (read-only)
+      - ${HOME}/.local/share/signal-api:/home/.local/share/signal-api:ro
     environment:
       - PYTHONUNBUFFERED=1
       # Override URLs to use container network
