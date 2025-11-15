@@ -167,7 +167,7 @@ def handle_generate_image_cmd(user, prompt):
         user.send_message("Failed to generate the image.")
 
 
-def handle_ai_message(user, content, attachments, sender_name=None):
+def handle_ai_message(user, content, attachments, sender_name=None, should_respond=True):
     # Prepend sender name to content for group chats
     if user.group_id and sender_name:
         # For group chats, prefix the message with the sender's name
@@ -228,6 +228,11 @@ def handle_ai_message(user, content, attachments, sender_name=None):
                     "role": "user",
                     "content": claude_message_content
                 })
+
+                # If we shouldn't respond (not mentioned in group), just add to history and return
+                if not should_respond:
+                    print(f"DEBUG - Message added to history but not responding (not mentioned)")
+                    return
 
                 # Build system prompt - add group chat context if needed
                 if user.group_id:
@@ -327,12 +332,22 @@ def process_message(message: Dict):
                     print(f"DEBUG - Bot was mentioned!")
                     break
 
-        if not bot_mentioned:
-            print(f"DEBUG - Bot not mentioned, ignoring group message")
-            return
+        # Store the flag for later - we'll still process the message for history
+        should_respond = bot_mentioned
+
+        # Check if message should be hidden from history (starts with ".")
+        if content.startswith("."):
+            if bot_mentioned:
+                # Bot is mentioned, so respond normally (override hiding)
+                print(f"DEBUG - Hidden message but bot mentioned, processing normally")
+            else:
+                # Hidden message and bot not mentioned - ignore completely
+                print(f"DEBUG - Hidden message (starts with '.') and not mentioned, ignoring")
+                return
     else:
         display_sender = sender_name if sender_name else sender
         print(f"Received message from {display_sender} ({sender}) at {timestamp}: {content}")
+        should_respond = True  # Always respond to DMs
 
     # Handle empty messages (e.g., image-only messages)
     if not content and not attachments:
@@ -363,4 +378,4 @@ def process_message(message: Dict):
     elif command == "!is":
         handle_image_size_cmd(user, args)
     else:
-        handle_ai_message(user, content, attachments, sender_name=sender_name)
+        handle_ai_message(user, content, attachments, sender_name=sender_name, should_respond=should_respond)
