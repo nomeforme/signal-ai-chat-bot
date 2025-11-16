@@ -113,6 +113,7 @@ RANDOM_REPLY_CHANCE = CONFIG.get("random_reply_chance", 0)  # Set to N for 1 in 
 SPONTANEOUS_REPLY_ENABLED = CONFIG.get("spontaneous_reply_enabled", False)
 SPONTANEOUS_REPLY_MIN_INTERVAL_HOURS = CONFIG.get("spontaneous_reply_min_interval_hours", 2)
 SPONTANEOUS_REPLY_MEAN_INTERVAL_HOURS = CONFIG.get("spontaneous_reply_mean_interval_hours", 6)
+MAX_BOT_MENTIONS_PER_CONVERSATION = CONFIG.get("max_bot_mentions_per_conversation", 10)
 IMAGE_SIZES = {
     "(1) square": {"width": 512, "height": 512},
     "(2) square_hd": {"width": 1024, "height": 1024},

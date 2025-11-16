@@ -97,5 +97,6 @@
   "random_reply_chance": 100,
   "spontaneous_reply_enabled": true,
   "spontaneous_reply_min_interval_hours": 2,
-  "spontaneous_reply_mean_interval_hours": 24
+  "spontaneous_reply_mean_interval_hours": 24,
+  "max_bot_mentions_per_conversation": 25
 }
