@@ -20,6 +20,8 @@ class User:
         self.image_size = config.DEFAULT_IMAGE_SIZE
         # Privacy mode: defaults to config value, but can be overridden per user/group
         self.privacy_mode = config.GROUP_PRIVACY_MODE
+        # Bot mention counter to prevent infinite loops (tracks mentions BY bots)
+        self.bot_mention_count = 0
 
     def is_session_inactive(self, timeout=config.SESSION_TIMEOUT):
         if self.last_activity is None:
@@ -68,6 +70,18 @@ class User:
             self.privacy_mode = mode
             return True
         return False
+
+    def increment_bot_mention_counter(self):
+        """Increment the bot mention counter (when this bot is mentioned by another bot)"""
+        self.bot_mention_count += 1
+
+    def reset_bot_mention_counter(self):
+        """Reset the bot mention counter (called when human sends message)"""
+        self.bot_mention_count = 0
+
+    def is_bot_loop_limit_reached(self):
+        """Check if bot has been mentioned too many times by other bots"""
+        return self.bot_mention_count >= config.MAX_BOT_MENTIONS_PER_CONVERSATION
 
     def _split_message(self, content, max_length=400):
         """Split long messages into chunks to avoid 'see more' in Signal"""

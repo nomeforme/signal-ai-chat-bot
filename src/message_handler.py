@@ -44,11 +44,6 @@ user_name_to_phone = {}  # Cache for mapping display names to phone numbers
 # Spontaneous reply tracking: {bot_phone: {group_id: next_spontaneous_time}}
 next_spontaneous_reply = {}
 
-# Bot mention counter per group to prevent infinite loops: {group_id: consecutive_bot_mention_count}
-bot_mention_counter = {}
-# Track last message sender to detect consecutive bot mentions: {group_id: last_sender_uuid}
-last_message_sender = {}
-
 def schedule_next_spontaneous_reply(bot_phone, group_id):
     """Schedule the next spontaneous reply time using gamma distribution (skewed early)"""
     if not config.SPONTANEOUS_REPLY_ENABLED:
@@ -1027,7 +1022,7 @@ def process_message(message: Dict, bot_phone: str = None):
     if is_group_chat and group_id:
         check_and_trigger_spontaneous_reply(bot_phone, group_id)
 
-    # Track bot mention counter to prevent infinite loops
+    # Track bot mentions to prevent infinite loops
     if is_group_chat and group_id:
         # Check if sender is a bot
         sender_is_bot = False
@@ -1037,23 +1032,25 @@ def process_message(message: Dict, bot_phone: str = None):
                 sender_is_bot = True
                 break
 
-        # Update mention counter
         if sender_is_bot:
-            # Increment counter if this is a bot message
-            bot_mention_counter[group_id] = bot_mention_counter.get(group_id, 0) + 1
-            print(f"[MENTION COUNTER] Bot message detected in {group_id[:20]}... Count: {bot_mention_counter[group_id]}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION}")
+            # This message is from a bot
+            if bot_mentioned:
+                # This bot is mentioned by another bot - increment counter
+                user.increment_bot_mention_counter()
+                print(f"[BOT LOOP PREVENTION] {bot_phone[:15]}... mentioned by bot. Count: {user.bot_mention_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION}")
 
-            # Check if we've exceeded the limit
-            if bot_mention_counter[group_id] >= config.MAX_BOT_MENTIONS_PER_CONVERSATION:
-                print(f"{Fore.RED}[MENTION COUNTER] ⚠ Limit reached ({config.MAX_BOT_MENTIONS_PER_CONVERSATION})! Skipping bot mention to prevent loop.{Style.RESET_ALL}")
-                # Clear the counter and skip this message
-                bot_mention_counter[group_id] = 0
-                bot_mentioned = False  # Force bot to not respond
+                # Check if limit reached
+                if user.is_bot_loop_limit_reached():
+                    print(f"{Fore.RED}[BOT LOOP PREVENTION] ⚠ Limit reached! Skipping to prevent infinite loop. Will reset on next human message.{Style.RESET_ALL}")
+                    user.reset_bot_mention_counter()
+                    return  # Stop all processing for this bot
         else:
-            # Human message - reset the counter
-            if group_id in bot_mention_counter and bot_mention_counter[group_id] > 0:
-                print(f"[MENTION COUNTER] Human message detected. Resetting counter for {group_id[:20]}...")
-                bot_mention_counter[group_id] = 0
+            # Human message - reset all bot counters in this group
+            # Get all user objects for this group and reset their counters
+            for user_key in list(users.keys()):
+                if user_key.endswith(f":{group_id}"):
+                    users[user_key].reset_bot_mention_counter()
+            print(f"[BOT LOOP PREVENTION] Human message detected. Reset all bot counters in group.")
 
     # Apply privacy filtering for group chats
     if is_group_chat:
