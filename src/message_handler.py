@@ -1035,15 +1035,14 @@ def process_message(message: Dict, bot_phone: str = None):
         if sender_is_bot:
             # This message is from a bot
             if bot_mentioned:
-                # This bot is mentioned by another bot - increment counter
+                # This bot is mentioned by another bot - check if limit already reached
+                if user.is_bot_loop_limit_reached():
+                    print(f"{Fore.RED}[BOT LOOP PREVENTION] ⚠ Limit reached ({user.bot_mention_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION})! Skipping to prevent infinite loop. Will reset on next human message.{Style.RESET_ALL}")
+                    return  # Stop all processing for this bot
+
+                # Increment counter (will be used for next mention check)
                 user.increment_bot_mention_counter()
                 print(f"[BOT LOOP PREVENTION] {bot_phone[:15]}... mentioned by bot. Count: {user.bot_mention_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION}")
-
-                # Check if limit reached
-                if user.is_bot_loop_limit_reached():
-                    print(f"{Fore.RED}[BOT LOOP PREVENTION] ⚠ Limit reached! Skipping to prevent infinite loop. Will reset on next human message.{Style.RESET_ALL}")
-                    user.reset_bot_mention_counter()
-                    return  # Stop all processing for this bot
         else:
             # Human message - reset all bot counters in this group
             # Get all user objects for this group and reset their counters
