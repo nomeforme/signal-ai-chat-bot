@@ -315,38 +315,65 @@ def get_group_members(group_id: str, bot_phone: str):
         group_info = response.json()
 
         members = []
-        # Get bot names from config
-        bot_names = {bot["phone"]: bot["name"] for bot in config.BOT_INSTANCES}
+        # Get bot names from config (by both phone and UUID)
+        bot_names_by_phone = {bot["phone"]: bot["name"] for bot in config.BOT_INSTANCES}
+
+        # Build UUID to bot name mapping
+        bot_names_by_uuid = {}
+        for bot in config.BOT_INSTANCES:
+            bot_uuid = get_bot_uuid(bot["phone"])
+            if bot_uuid:
+                bot_names_by_uuid[bot_uuid] = bot["name"]
 
         # Add members with their display names
         for member in group_info.get("members", []):
-            # Member can be either a string (phone number) or dict with profile info
+            member_name = None
+
+            # Member can be a string (phone/UUID) or dict with profile info
             if isinstance(member, str):
-                # Member is just a phone number string
-                member_number = member
-                # Check if it's a bot
-                if member_number in bot_names:
-                    member_name = bot_names[member_number]
+                # Could be phone number or UUID
+                if member.startswith('+'):
+                    # It's a phone number
+                    if member in bot_names_by_phone:
+                        member_name = bot_names_by_phone[member]
+                    else:
+                        # Check cached display names (reverse lookup)
+                        for name, phone in user_name_to_phone.items():
+                            if phone == member:
+                                member_name = name
+                                break
+                        if not member_name:
+                            member_name = member  # Use phone number as fallback
                 else:
-                    # Use cached display name if available, otherwise use number
-                    member_name = user_name_to_phone.get(member_number, member_number)
-                    # Reverse lookup in cache
-                    for name, phone in user_name_to_phone.items():
-                        if phone == member_number:
-                            member_name = name
-                            break
+                    # It's a UUID
+                    if member in bot_names_by_uuid:
+                        member_name = bot_names_by_uuid[member]
+                    else:
+                        # Try to find in cache by checking if any cached user has this UUID
+                        # For now, just mark as unknown - we'd need to query Signal for profile
+                        member_name = f"User-{member[:8]}"  # Shortened UUID
             else:
                 # Member is a dict with profile info
-                member_name = member.get("profile_name") or member.get("number") or "Unknown"
+                member_uuid = member.get("uuid")
                 member_number = member.get("number")
-                if member_number in bot_names:
-                    member_name = bot_names[member_number]
 
-            members.append(member_name)
+                # Check if it's a bot first
+                if member_uuid and member_uuid in bot_names_by_uuid:
+                    member_name = bot_names_by_uuid[member_uuid]
+                elif member_number and member_number in bot_names_by_phone:
+                    member_name = bot_names_by_phone[member_number]
+                else:
+                    # Use profile name or number
+                    member_name = member.get("profile_name") or member_number or "Unknown"
+
+            if member_name:
+                members.append(member_name)
 
         return members
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"Error fetching group members: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
 
