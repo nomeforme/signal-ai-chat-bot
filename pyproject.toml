@@ -22,6 +22,7 @@ dependencies = [
     "claude-agent-sdk>=0.1.6",
     "watchdog>=3.0.0",
     "colorama>=0.4.6",
+    "numpy>=1.24.0",
 ]
 
 [project.urls]
