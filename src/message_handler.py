@@ -617,16 +617,17 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 """
 
                 # Build system prompt - add group chat context if needed
-                if user.group_id:
-                    # Extract clean model name for identity
-                    clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
+                # Extract clean model name for identity (applies to both group and individual chats)
+                clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
+                identity_context = f"""Your model identifier is [{clean_model_name}].
+                Always use this when asked about your name."""
 
+                if user.group_id:
                     # Get group participants
                     participants = get_group_members(user.group_id, user.bot_phone)
                     participants_list = ", ".join(participants) if participants else "unable to retrieve participant list"
 
-                    group_context = f"""You are [{clean_model_name}].
-                    You are in a group chat with users and other AI bots.
+                    group_context = f"""You are in a group chat with users and other AI bots.
                     Participants in this group: {participants_list}
                     Messages are prefixed with [participant] to indicate the participant.
                     Be parsimonious, if you wish to directly address another participant (which will notify them),
@@ -634,14 +635,15 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     """
 
                     if user.current_system_instruction:
-                        system_prompt = f"{user.current_system_instruction}\n\n{group_context}\n\n{signal_formatting}"
+                        system_prompt = f"{user.current_system_instruction}\n\n{identity_context}\n\n{group_context}\n\n{signal_formatting}"
                     else:
-                        system_prompt = f"{group_context}\n\n{signal_formatting}"
+                        system_prompt = f"{identity_context}\n\n{group_context}\n\n{signal_formatting}"
                 else:
+                    # Individual chat - include identity context
                     if user.current_system_instruction:
-                        system_prompt = f"{user.current_system_instruction}\n\n{signal_formatting}"
+                        system_prompt = f"{user.current_system_instruction}\n\n{identity_context}\n\n{signal_formatting}"
                     else:
-                        system_prompt = signal_formatting
+                        system_prompt = f"{identity_context}\n\n{signal_formatting}"
 
                 # Note: Bedrock supports tool use with the same format as Anthropic API
                 # We'll add tools to the Bedrock request body below
@@ -688,8 +690,10 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                         bedrock_model_id = f"anthropic.{base_model}-v1:0"
 
                     # Bedrock requires strict alternating roles, so merge consecutive user messages
-                    def merge_consecutive_user_messages(messages):
-                        """Merge consecutive user messages for Bedrock API compatibility"""
+                    # For bedrock-claude-3-sonnet specifically, also insert empty user messages between assistant messages
+                    def merge_consecutive_user_messages(messages, insert_separators_for_3_sonnet=False):
+                        """Merge consecutive user messages for Bedrock API compatibility
+                        For 3-sonnet model, also insert empty user messages between assistant messages"""
                         if not messages:
                             return messages
 
@@ -732,13 +736,19 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
 
                                 merged.append({"role": "user", "content": merged_content})
                             else:
-                                # Assistant message, keep as is
+                                # Assistant message
+                                # For 3-sonnet: if previous message was also assistant, insert empty user message
+                                if insert_separators_for_3_sonnet and merged and merged[-1]["role"] == "assistant":
+                                    merged.append({"role": "user", "content": [{"type": "text", "text": " "}]})
+
                                 merged.append(current)
                                 i += 1
 
                         return merged
 
-                    bedrock_conversation = merge_consecutive_user_messages(conversation_history)
+                    # Check if this is the bedrock-claude-3-sonnet model
+                    is_3_sonnet = "bedrock-claude-3-sonnet-20240229" in model_name
+                    bedrock_conversation = merge_consecutive_user_messages(conversation_history, insert_separators_for_3_sonnet=is_3_sonnet)
 
                     # Prepare Bedrock request body
                     bedrock_body = {
