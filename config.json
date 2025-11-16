@@ -94,5 +94,8 @@
   "default_image_size": "(5) portrait_3_4",
   "lora_path_to_url": {},
   "prompt_replace_dict": {},
-  "random_reply_chance": 100
+  "random_reply_chance": 100,
+  "spontaneous_reply_enabled": true,
+  "spontaneous_reply_min_interval_hours": 2,
+  "spontaneous_reply_mean_interval_hours": 24
 }
