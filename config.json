@@ -98,5 +98,5 @@
   "spontaneous_reply_enabled": true,
   "spontaneous_reply_min_interval_hours": 2,
   "spontaneous_reply_mean_interval_hours": 24,
-  "max_bot_mentions_per_conversation": 0
+  "max_bot_mentions_per_conversation": 1
 }
