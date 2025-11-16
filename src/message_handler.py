@@ -320,12 +320,28 @@ def get_group_members(group_id: str, bot_phone: str):
 
         # Add members with their display names
         for member in group_info.get("members", []):
-            # Try to get name from profile
-            member_name = member.get("profile_name") or member.get("number") or "Unknown"
-            # If it's a bot, use bot name
-            member_number = member.get("number")
-            if member_number in bot_names:
-                member_name = bot_names[member_number]
+            # Member can be either a string (phone number) or dict with profile info
+            if isinstance(member, str):
+                # Member is just a phone number string
+                member_number = member
+                # Check if it's a bot
+                if member_number in bot_names:
+                    member_name = bot_names[member_number]
+                else:
+                    # Use cached display name if available, otherwise use number
+                    member_name = user_name_to_phone.get(member_number, member_number)
+                    # Reverse lookup in cache
+                    for name, phone in user_name_to_phone.items():
+                        if phone == member_number:
+                            member_name = name
+                            break
+            else:
+                # Member is a dict with profile info
+                member_name = member.get("profile_name") or member.get("number") or "Unknown"
+                member_number = member.get("number")
+                if member_number in bot_names:
+                    member_name = bot_names[member_number]
+
             members.append(member_name)
 
         return members
