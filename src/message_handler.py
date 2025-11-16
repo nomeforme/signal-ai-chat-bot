@@ -306,6 +306,34 @@ def get_group_id_from_internal(internal_id: str, bot_phone: str):
         return f"group.{internal_id}" if not internal_id.startswith("group.") else internal_id
 
 
+def get_group_members(group_id: str, bot_phone: str):
+    """Get list of group member names for a group"""
+    url = f"{HTTP_BASE_URL}/v1/groups/{bot_phone}/{group_id}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        group_info = response.json()
+
+        members = []
+        # Get bot names from config
+        bot_names = {bot["phone"]: bot["name"] for bot in config.BOT_INSTANCES}
+
+        # Add members with their display names
+        for member in group_info.get("members", []):
+            # Try to get name from profile
+            member_name = member.get("profile_name") or member.get("number") or "Unknown"
+            # If it's a bot, use bot name
+            member_number = member.get("number")
+            if member_number in bot_names:
+                member_name = bot_names[member_number]
+            members.append(member_name)
+
+        return members
+    except requests.RequestException as e:
+        print(f"Error fetching group members: {e}")
+        return []
+
+
 def get_or_create_user(sender, group_id=None, bot_phone=None):
     # Create unique key: always include bot_phone to keep bot contexts separate
     # Format: "bot_phone:sender" or "bot_phone:group_id"
@@ -550,8 +578,13 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     # Extract clean model name for identity
                     clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
 
+                    # Get group participants
+                    participants = get_group_members(user.group_id, user.bot_phone)
+                    participants_list = ", ".join(participants) if participants else "unable to retrieve participant list"
+
                     group_context = f"""You are [{clean_model_name}].
                     You are in a group chat with users and other AI bots.
+                    Participants in this group: {participants_list}
                     Messages are prefixed with [participant] to indicate the participant.
                     Be parsimonious, if you wish to directly address another participant (which will notify them),
                     mention their name in your response (with @participant).
