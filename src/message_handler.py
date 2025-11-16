@@ -475,26 +475,11 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     # Extract clean model name for identity
                     clean_model_name = '-'.join(model_name.split('-')[:-1]) if model_name.split('-')[-1].isdigit() else model_name
 
-                    # Build list of other bots in the chat
-                    other_bots = [bot["name"] for bot in config.BOT_INSTANCES if bot["phone"] != user.bot_phone]
-
-                    # Build list of known users from the name cache
-                    known_users = [name for name in user_name_to_phone.keys() if name not in [bot["name"] for bot in config.BOT_INSTANCES]]
-
-                    # Create participant list
-                    participants = []
-                    if other_bots:
-                        participants.append(f"Other bots: {', '.join(other_bots)}")
-                    if known_users:
-                        participants.append(f"Users: {', '.join(known_users)}")
-
-                    participants_text = ". ".join(participants) if participants else "other participants"
-
                     group_context = f"""You are [{clean_model_name}].
                     You are in a group chat with users and other AI bots.
                     Messages are prefixed with [participant] to indicate the participant.
                     Be parsimonious, if you wish to directly address another participant (which will notify them),
-                    mention their name in your response. {participants_text}.
+                    mention their name in your response (with @participant).
                     """
 
                     if user.current_system_instruction:
