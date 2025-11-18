@@ -186,7 +186,7 @@ def get_help_message(privacy_mode):
 - !im <prompt>: Generate an image
 - !is <number>: Change image size
 - !privacy <opt-in|opt-out>: Change privacy mode for this chat
-- !rr <number>: Set random reply chance (0=off, 1=100%, 10=10%, etc.)
+- @mention + !rr <number>: Set random reply chance (0=off, 1=100%, 10=10%, etc.)
 
 {privacy_help}
 
@@ -1078,7 +1078,8 @@ def process_message(message: Dict, bot_phone: str = None):
         handle_image_size_cmd(user, args)
     elif command == "!privacy":
         handle_privacy_cmd(user, args)
-    elif command == "!rr":
+    elif command == "!rr" and bot_mentioned:
+        # Only respond to !rr if this bot is mentioned (to avoid all bots replying)
         handle_random_reply_cmd(user, args)
     else:
         handle_ai_message(user, content, attachments, sender_name=sender_name, should_respond=should_respond)
