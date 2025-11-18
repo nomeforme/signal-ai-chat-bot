@@ -528,11 +528,21 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     if user.group_id not in group_histories:
                         group_histories[user.group_id] = []
 
-                    # Add user message to shared group history
-                    group_histories[user.group_id].append({
-                        "role": "user",
-                        "content": claude_message_content
-                    })
+                    # Add user message to shared group history (only if not already present)
+                    # Check if this exact message is already in history to avoid duplicates
+                    # (multiple bots process the same incoming message)
+                    message_already_exists = False
+                    if group_histories[user.group_id]:
+                        last_message = group_histories[user.group_id][-1]
+                        if (last_message.get("role") == "user" and
+                            last_message.get("content") == claude_message_content):
+                            message_already_exists = True
+
+                    if not message_already_exists:
+                        group_histories[user.group_id].append({
+                            "role": "user",
+                            "content": claude_message_content
+                        })
 
                     # Trim shared history
                     if len(group_histories[user.group_id]) > config.MAX_HISTORY_MESSAGES:
@@ -832,11 +842,19 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 # Note: Even if agent executor was used, we only store the final text response
                 # (not the intermediate tool calls) to keep history simple and compatible
                 if user.group_id:
-                    # Add to shared group history
-                    group_histories[user.group_id].append({
-                        "role": "assistant",
-                        "content": history_response
-                    })
+                    # Add to shared group history (only if not already present to avoid duplicates)
+                    response_already_exists = False
+                    if group_histories[user.group_id]:
+                        last_message = group_histories[user.group_id][-1]
+                        if (last_message.get("role") == "assistant" and
+                            last_message.get("content") == history_response):
+                            response_already_exists = True
+
+                    if not response_already_exists:
+                        group_histories[user.group_id].append({
+                            "role": "assistant",
+                            "content": history_response
+                        })
                 else:
                     # Add to individual history
                     user.claude_history.append({
