@@ -86,7 +86,7 @@
     }
   ],
   "max_history_messages": 200,
-  "group_privacy_mode": "opt-in",
+  "group_privacy_mode": "opt-out",
   "trusted_phone_numbers": [],
   "session_timeout": 30,
   "default_model": "(6) claude-haiku-4-5-20251001",

@@ -954,16 +954,16 @@ def process_message(message: Dict, bot_phone: str = None):
     # Create or get user object
     user = get_or_create_user(sender, group_id=group_id, bot_phone=bot_phone)
 
-    # Track bot mentions to prevent infinite loops
+    # Check if sender is a bot (for both group and DM contexts)
+    sender_is_bot = False
     if is_group_chat and group_id:
-        # Check if sender is a bot
-        sender_is_bot = False
         for bot in config.BOT_INSTANCES:
             bot_uuid = get_bot_uuid(bot["phone"])
             if sender == bot["phone"] or (bot_uuid and sender_uuid == bot_uuid):
                 sender_is_bot = True
                 break
 
+        # Track bot mentions to prevent infinite loops
         if sender_is_bot:
             # This message is from a bot
             if bot_mentioned:
@@ -983,33 +983,39 @@ def process_message(message: Dict, bot_phone: str = None):
                     users[user_key].reset_bot_mention_counter()
             print(f"[BOT LOOP PREVENTION] Human message detected. Reset all bot counters in group.")
 
-    # Apply privacy filtering for group chats
+    # Apply privacy filtering for group chats (only for human messages, not bot messages)
     if is_group_chat:
         is_command = content.startswith("!")
 
-        # Check if message should be stored in history based on user's privacy mode
-        if user.privacy_mode == "opt-in":
-            # Opt-in mode: Only store if prefixed with "." OR bot is mentioned
-            store_in_history = content.startswith(".") or bot_mentioned
-            # Only respond if bot is mentioned (this includes commands)
-            should_respond = bot_mentioned
-
-            if not store_in_history:
-                return
-
-            # If message starts with ".", remove the prefix for processing
-            if content.startswith("."):
-                content = content[1:].lstrip()  # Remove "." and any following spaces
-        else:
-            # Opt-out mode: Store all messages UNLESS prefixed with "."
-            if content.startswith("."):
-                # User explicitly opted out of this message
-                return
-
-            # Store all other messages (commands, mentions, and regular messages)
+        if sender_is_bot:
+            # Bot messages always get stored and processed, regardless of privacy settings
             store_in_history = True
-            # Only respond if bot is mentioned (this includes commands)
-            should_respond = bot_mentioned
+            should_respond = bot_mentioned  # Bots respond if mentioned
+        else:
+            # Human messages: apply privacy filtering
+            # Check if message should be stored in history based on user's privacy mode
+            if user.privacy_mode == "opt-in":
+                # Opt-in mode: Only store if prefixed with "." OR bot is mentioned
+                store_in_history = content.startswith(".") or bot_mentioned
+                # Only respond if bot is mentioned (this includes commands)
+                should_respond = bot_mentioned
+
+                if not store_in_history:
+                    return
+
+                # If message starts with ".", remove the prefix for processing
+                if content.startswith("."):
+                    content = content[1:].lstrip()  # Remove "." and any following spaces
+            else:
+                # Opt-out mode: Store all messages UNLESS prefixed with "."
+                if content.startswith("."):
+                    # User explicitly opted out of this message
+                    return
+
+                # Store all other messages (commands, mentions, and regular messages)
+                store_in_history = True
+                # Only respond if bot is mentioned (this includes commands)
+                should_respond = bot_mentioned
 
         # Random reply feature: Give bot a chance to respond even when not mentioned
         if not should_respond and config.RANDOM_REPLY_CHANCE > 0:
