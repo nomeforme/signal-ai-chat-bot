@@ -2,7 +2,6 @@ import io
 import os
 import random
 import time
-import numpy as np
 from datetime import datetime
 from typing import Dict
 from PIL import Image
@@ -40,79 +39,6 @@ users = {}
 bot_uuid_cache = {}  # Cache for bot phone -> UUID mapping
 group_histories = {}  # Shared conversation history for group chats: {group_id: [messages]}
 user_name_to_phone = {}  # Cache for mapping display names to phone numbers
-
-# Spontaneous reply tracking: {bot_phone: {group_id: next_spontaneous_time}}
-next_spontaneous_reply = {}
-
-def schedule_next_spontaneous_reply(bot_phone, group_id):
-    """Schedule the next spontaneous reply time using gamma distribution (skewed early)"""
-    if not config.SPONTANEOUS_REPLY_ENABLED:
-        return
-
-    # Convert hours to seconds
-    min_interval_seconds = config.SPONTANEOUS_REPLY_MIN_INTERVAL_HOURS * 3600
-    mean_interval_seconds = config.SPONTANEOUS_REPLY_MEAN_INTERVAL_HOURS * 3600
-
-    # Use gamma distribution for skewed-early behavior
-    # For gamma(k, θ): mean = k*θ, variance = k*θ²
-    # Using k=2 gives moderate skew (most values early, long tail)
-    # θ = mean/k to achieve desired mean
-    shape_k = 2.0  # Shape parameter (lower = more skewed)
-    scale_theta = mean_interval_seconds / shape_k
-
-    # Sample from gamma distribution
-    wait_time = np.random.gamma(shape_k, scale_theta)
-    wait_time = max(wait_time, min_interval_seconds)
-
-    # Schedule next time
-    next_time = time.time() + wait_time
-
-    if bot_phone not in next_spontaneous_reply:
-        next_spontaneous_reply[bot_phone] = {}
-    next_spontaneous_reply[bot_phone][group_id] = next_time
-
-    print(f"[Spontaneous] Scheduled next reply for {bot_phone} in group {group_id[:20]}... in {wait_time/3600:.2f} hours")
-
-def check_and_trigger_spontaneous_reply(bot_phone, group_id):
-    """Check if it's time for a spontaneous reply and trigger if needed"""
-    if not config.SPONTANEOUS_REPLY_ENABLED:
-        return False
-
-    current_time = time.time()
-
-    # Initialize if needed
-    if bot_phone not in next_spontaneous_reply:
-        next_spontaneous_reply[bot_phone] = {}
-
-    # If no next time scheduled, schedule one now
-    if group_id not in next_spontaneous_reply[bot_phone]:
-        schedule_next_spontaneous_reply(bot_phone, group_id)
-        return False  # Don't trigger on first message
-
-    # Check if it's time
-    next_time = next_spontaneous_reply[bot_phone][group_id]
-    if current_time >= next_time:
-        print(f"[Spontaneous] Triggering spontaneous reply for {bot_phone} in group {group_id[:20]}...")
-
-        # Trigger spontaneous reply
-        try:
-            user = get_or_create_user(sender="spontaneous", group_id=group_id, bot_phone=bot_phone)
-            handle_ai_message(
-                user=user,
-                content="",  # Empty content for spontaneous
-                attachments=[],
-                sender_name=None,
-                should_respond=True
-            )
-            print(f"[Spontaneous] ✓ Spontaneous reply sent")
-        except Exception as e:
-            print(f"[Spontaneous] Error sending spontaneous reply: {e}")
-
-        # Schedule next spontaneous reply
-        schedule_next_spontaneous_reply(bot_phone, group_id)
-        return True
-
-    return False
 
 def get_bot_uuid(bot_phone):
     """Get the UUID for a bot's phone number by querying Signal API"""
@@ -1027,10 +953,6 @@ def process_message(message: Dict, bot_phone: str = None):
 
     # Create or get user object
     user = get_or_create_user(sender, group_id=group_id, bot_phone=bot_phone)
-
-    # Check for spontaneous reply (only in group chats, independent of current message)
-    if is_group_chat and group_id:
-        check_and_trigger_spontaneous_reply(bot_phone, group_id)
 
     # Track bot mentions to prevent infinite loops
     if is_group_chat and group_id:
