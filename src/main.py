@@ -41,10 +41,10 @@ def create_message_handler(bot_phone):
                             is_bot_message = True
                             break
 
+                is_first_receiver_for_message = False
                 if not is_bot_message:
                     # This is a user message, track it
                     message_id = f"{source}:{timestamp}"
-                    is_first_receiver = False
 
                     # Extract mentioned bot UUIDs from the message (both @mentions and replies/quotes)
                     mentioned_bot_uuids = set()
@@ -72,16 +72,16 @@ def create_message_handler(bot_phone):
                                 "data": data,  # Store the raw message data
                                 "mentioned_bot_uuids": mentioned_bot_uuids
                             }
-                            is_first_receiver = True
+                            is_first_receiver_for_message = True
                         last_user_message[message_id]["received_by"].add(bot_phone)
 
                         # If this is the first bot to receive this message, schedule a check
-                        if is_first_receiver and not last_user_message[message_id]["check_scheduled"]:
+                        if is_first_receiver_for_message and not last_user_message[message_id]["check_scheduled"]:
                             last_user_message[message_id]["check_scheduled"] = True
                             # Schedule consistency check in a separate thread after 3 seconds
                             threading.Timer(3.0, check_message_consistency, args=[message_id]).start()
 
-            process_message(data, bot_phone)
+            process_message(data, bot_phone, is_first_receiver=is_first_receiver_for_message)
         except json.JSONDecodeError:
             print(f"[{bot_phone}] Failed to decode JSON: {message}")
         except Exception as e:
@@ -133,8 +133,8 @@ def create_open_handler(bot_phone):
             print(f"[{bot_phone}] Re-processing {len(messages_to_process)} pending message(s)...")
             for msg_data in messages_to_process:
                 try:
-                    # Re-trigger message processing
-                    process_message(msg_data, bot_phone)
+                    # Re-trigger message processing (not first receiver for re-processed messages)
+                    process_message(msg_data, bot_phone, is_first_receiver=False)
                     print(f"[{bot_phone}] ✓ Successfully re-processed pending message")
                 except Exception as e:
                     print(f"[{bot_phone}] ⚠ Error re-processing message: {e}")

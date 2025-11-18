@@ -465,7 +465,7 @@ def handle_generate_image_cmd(user, prompt):
         user.send_message("Failed to generate the image.")
 
 
-def handle_ai_message(user, content, attachments, sender_name=None, should_respond=True):
+def handle_ai_message(user, content, attachments, sender_name=None, should_respond=True, is_first_receiver=False):
     # Prepend sender name to content for group chats
     if user.group_id and sender_name:
         # For group chats, prefix the message with the sender's name
@@ -528,17 +528,9 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                     if user.group_id not in group_histories:
                         group_histories[user.group_id] = []
 
-                    # Add user message to shared group history (only if not already present)
-                    # Check if this exact message is already in history to avoid duplicates
-                    # (multiple bots process the same incoming message)
-                    message_already_exists = False
-                    if group_histories[user.group_id]:
-                        last_message = group_histories[user.group_id][-1]
-                        if (last_message.get("role") == "user" and
-                            last_message.get("content") == claude_message_content):
-                            message_already_exists = True
-
-                    if not message_already_exists:
+                    # Add user message to shared group history
+                    # Only the first bot to receive a message should add it to shared history
+                    if is_first_receiver:
                         group_histories[user.group_id].append({
                             "role": "user",
                             "content": claude_message_content
@@ -842,12 +834,13 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                 # Note: Even if agent executor was used, we only store the final text response
                 # (not the intermediate tool calls) to keep history simple and compatible
                 if user.group_id:
-                    # Add to shared group history (only if not already present to avoid duplicates)
+                    # Add to shared group history (only if not a duplicate of last message)
+                    # Check last message to prevent duplicates from reconnection/re-processing
                     response_already_exists = False
                     if group_histories[user.group_id]:
-                        last_message = group_histories[user.group_id][-1]
-                        if (last_message.get("role") == "assistant" and
-                            last_message.get("content") == history_response):
+                        last_msg = group_histories[user.group_id][-1]
+                        if (last_msg.get("role") == "assistant" and
+                            last_msg.get("content") == history_response):
                             response_already_exists = True
 
                     if not response_already_exists:
@@ -889,7 +882,7 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
         user.send_message("I received your message, but it seems to be empty.")
 
 
-def process_message(message: Dict, bot_phone: str = None):
+def process_message(message: Dict, bot_phone: str = None, is_first_receiver: bool = False):
     if "envelope" not in message:
         return
     if "dataMessage" not in message["envelope"]:
@@ -1100,4 +1093,4 @@ def process_message(message: Dict, bot_phone: str = None):
         # Only respond to !rr if this bot is mentioned (to avoid all bots replying)
         handle_random_reply_cmd(user, args)
     else:
-        handle_ai_message(user, content, attachments, sender_name=sender_name, should_respond=should_respond)
+        handle_ai_message(user, content, attachments, sender_name=sender_name, should_respond=should_respond, is_first_receiver=is_first_receiver)
