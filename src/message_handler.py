@@ -186,6 +186,7 @@ def get_help_message(privacy_mode):
 - !im <prompt>: Generate an image
 - !is <number>: Change image size
 - !privacy <opt-in|opt-out>: Change privacy mode for this chat
+- !rr <number>: Set random reply chance (0=off, 1=100%, 10=10%, etc.)
 
 {privacy_help}
 
@@ -377,6 +378,36 @@ def handle_privacy_cmd(user, mode):
         user.send_message(f'Privacy mode changed to: "{mode}"')
     else:
         user.send_message("Invalid privacy mode. Use 'opt-in' or 'opt-out'.")
+
+
+def handle_random_reply_cmd(user, chance):
+    """Handle !rr command to set global random reply chance"""
+    chance = chance.strip()
+
+    if not chance:
+        # Show current setting
+        if config.RANDOM_REPLY_CHANCE == 0:
+            user.send_message("Random reply is currently disabled (0)")
+        else:
+            percentage = (1 / config.RANDOM_REPLY_CHANCE) * 100
+            user.send_message(f"Random reply chance: 1/{config.RANDOM_REPLY_CHANCE} ({percentage:.1f}%)")
+        return
+
+    if chance.isdigit():
+        new_chance = int(chance)
+        if new_chance >= 0:
+            config.RANDOM_REPLY_CHANCE = new_chance
+            if new_chance == 0:
+                user.send_message("Random reply disabled")
+            elif new_chance == 1:
+                user.send_message("Random reply set to 1/1 (100%) - bots will reply to every message")
+            else:
+                percentage = (1 / new_chance) * 100
+                user.send_message(f"Random reply chance set to 1/{new_chance} ({percentage:.1f}%)")
+        else:
+            user.send_message("Invalid value. Use a number >= 0 (0 = disabled, 1 = 100%, 10 = 10%, etc.)")
+    else:
+        user.send_message("Invalid value. Use a number >= 0 (0 = disabled, 1 = 100%, 10 = 10%, etc.)")
 
 
 def handle_generate_image_cmd(user, prompt):
@@ -1047,5 +1078,7 @@ def process_message(message: Dict, bot_phone: str = None):
         handle_image_size_cmd(user, args)
     elif command == "!privacy":
         handle_privacy_cmd(user, args)
+    elif command == "!rr":
+        handle_random_reply_cmd(user, args)
     else:
         handle_ai_message(user, content, attachments, sender_name=sender_name, should_respond=should_respond)
