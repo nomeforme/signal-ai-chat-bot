@@ -663,9 +663,9 @@ def handle_ai_message(user, content, attachments, sender_name=None, should_respo
                                 merged.append({"role": "user", "content": merged_content})
                             else:
                                 # Assistant message
-                                # For 3-sonnet: if previous message was also assistant, insert empty user message
+                                # For 3-sonnet: if previous message was also assistant, insert separator user message
                                 if insert_separators_for_3_sonnet and merged and merged[-1]["role"] == "assistant":
-                                    merged.append({"role": "user", "content": [{"type": "text", "text": " "}]})
+                                    merged.append({"role": "user", "content": [{"type": "text", "text": "[continue]"}]})
 
                                 merged.append(current)
                                 i += 1
@@ -963,24 +963,24 @@ def process_message(message: Dict, bot_phone: str = None):
                 sender_is_bot = True
                 break
 
-        # Track bot mentions to prevent infinite loops
+        # Track bot interactions to prevent infinite loops
         if sender_is_bot:
             # This message is from a bot
             if bot_mentioned:
                 # This bot is mentioned by another bot - check if limit already reached
                 if user.is_bot_loop_limit_reached():
-                    print(f"{Fore.RED}[BOT LOOP PREVENTION] ⚠ Limit reached ({user.bot_mention_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION})! Skipping to prevent infinite loop. Will reset on next human message.{Style.RESET_ALL}")
+                    print(f"{Fore.RED}[BOT LOOP PREVENTION] ⚠ Limit reached ({user.bot_interaction_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION})! Skipping to prevent infinite loop. Will reset on next human message.{Style.RESET_ALL}")
                     return  # Stop all processing for this bot
 
                 # Increment counter (will be used for next mention check)
-                user.increment_bot_mention_counter()
-                print(f"[BOT LOOP PREVENTION] {bot_phone[:15]}... mentioned by bot. Count: {user.bot_mention_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION}")
+                user.increment_bot_interaction_counter()
+                print(f"[BOT LOOP PREVENTION] {bot_phone[:15]}... mentioned by bot. Count: {user.bot_interaction_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION}")
         else:
             # Human message - reset all bot counters in this group
             # Get all user objects for this group and reset their counters
             for user_key in list(users.keys()):
                 if user_key.endswith(f":{group_id}"):
-                    users[user_key].reset_bot_mention_counter()
+                    users[user_key].reset_bot_interaction_counter()
             print(f"[BOT LOOP PREVENTION] Human message detected. Reset all bot counters in group.")
 
     # Apply privacy filtering for group chats (only for human messages, not bot messages)
@@ -1019,9 +1019,16 @@ def process_message(message: Dict, bot_phone: str = None):
 
         # Random reply feature: Give bot a chance to respond even when not mentioned
         if not should_respond and config.RANDOM_REPLY_CHANCE > 0:
-            if random.randint(1, config.RANDOM_REPLY_CHANCE) == 1:
+            # If sender is a bot, check if we've already hit the interaction limit
+            if sender_is_bot and user.is_bot_loop_limit_reached():
+                print(f"[BOT LOOP PREVENTION] ⚠ Random reply skipped - interaction limit reached ({user.bot_interaction_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION})")
+            elif random.randint(1, config.RANDOM_REPLY_CHANCE) == 1:
                 should_respond = True
                 print(f"DEBUG - Random reply triggered for {bot_phone} (1/{config.RANDOM_REPLY_CHANCE} chance)")
+                # If this is a random reply to a bot message, increment the interaction counter
+                if sender_is_bot:
+                    user.increment_bot_interaction_counter()
+                    print(f"[BOT LOOP PREVENTION] Random reply to bot message. Count: {user.bot_interaction_count}/{config.MAX_BOT_MENTIONS_PER_CONVERSATION}")
     else:
         # DMs always respond
         should_respond = True
